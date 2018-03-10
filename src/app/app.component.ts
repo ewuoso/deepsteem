@@ -22,54 +22,66 @@ export class AppComponent {
   ) {}
 
   updateCurationSum() {
-    this.curation_sum = this.votes
-      .map(vote => vote.value)
-      .reduce((acc, value) => acc + value);
-    this.curation_sum_1d = this.votes
-      .filter(vote => vote.eta < 24 * 60 * 60)
-      .map(vote => vote.value)
-      .reduce((acc, value) => acc + value);
+    this.curation_sum = 0;
+    if (this.votes && this.votes.length > 0)
+      this.curation_sum = this.votes
+        .map(vote => vote.value)
+        .reduce((acc, value) => acc + value);
+
+    if (this.votes && this.votes.length > 0) {
+      const votes_24h: any[] = this.votes.filter(
+        vote => vote.eta < 24 * 60 * 60
+      );
+      if (votes_24h && votes_24h.length > 0)
+        this.curation_sum_1d = votes_24h
+          .map(vote => vote.value)
+          .reduce((acc, value) => acc + value);
+    }
   }
 
   accountChanged(newName) {
     this.curation_sum = 0.0;
     this.curation_sum_1d = 0.0;
     this.account_name = newName;
+    this.votes = [];
     this.update();
     return newName;
   }
 
   update() {
-    this.steemService
-      .getVotingPower(this.account_name)
-      .then(vpow => (this.voting_power = vpow));
+    this.steemService.accountExists(this.account_name).then(exists => {
+      if (!exists) return;
+      this.steemService
+        .getVotingPower(this.account_name)
+        .then(vpow => (this.voting_power = vpow));
 
-    this.steemService
-      .getVoteValue(this.account_name)
-      .then(val => (this.vote_value = val));
+      this.steemService
+        .getVoteValue(this.account_name)
+        .then(val => (this.vote_value = val));
 
-    this.steemService.getVotes(this.account_name).then(val => {
-      val.forEach(vote => {
-        vote.value = 0.0;
-        vote.eta = 0;
-      });
-      val.forEach(
-        vote =>
-          (vote.url = this.sanitizer.bypassSecurityTrustResourceUrl(
-            "https://steemit.com/@" + vote.authorperm
-          ))
-      );
-      this.votes = val;
-      for (let i: number = 0; i < this.votes.length; i++) {
-        let vote = this.votes[i];
-        this.steemService.getCurationReward(vote).then(vote => {
-          if (vote.value < 0.0005) {
-            let index = this.votes.indexOf(vote);
-            if (index > -1) this.votes.splice(index, 1);
-          }
-          this.updateCurationSum();
+      this.steemService.getVotes(this.account_name).then(val => {
+        val.forEach(vote => {
+          vote.value = 0.0;
+          vote.eta = 0;
         });
-      }
+        val.forEach(
+          vote =>
+            (vote.url = this.sanitizer.bypassSecurityTrustResourceUrl(
+              "https://steemit.com/@" + vote.authorperm
+            ))
+        );
+        this.votes = val;
+        for (let i: number = 0; i < this.votes.length; i++) {
+          let vote = this.votes[i];
+          this.steemService.getCurationReward(vote).then(vote => {
+            if (vote.value < 0.0005) {
+              let index = this.votes.indexOf(vote);
+              if (index > -1) this.votes.splice(index, 1);
+            }
+            this.updateCurationSum();
+          });
+        }
+      });
     });
   }
 

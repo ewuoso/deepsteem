@@ -1,3 +1,6 @@
+### General
+* save account name in local storage
+
 ### Curation Rewards
 * shorten authorperms to a maximum link
 * convert time from minutes to d/h/m

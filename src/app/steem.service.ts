@@ -31,6 +31,16 @@ export class SteemService {
     return (now - time) / 1000;
   }
 
+  accountExists(accountName): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      steem.api.getAccounts([accountName], (err, response) => {
+        if (err) reject(err);
+        if (response[0]) resolve(true);
+        else resolve(false);
+      });
+    });
+  }
+
   getVotingPower(accountName): Promise<number> {
     return new Promise((resolve, reject) => {
       steem.api.getAccounts([accountName], (err, response) => {
