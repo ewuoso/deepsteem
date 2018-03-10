@@ -1,7 +1,6 @@
 ### Curation Rewards
 * shorten authorperms to a maximum link
 * convert time from minutes to d/h/m
-* reuse reward_fund
 
 ### Author Rewards
 * Pay respect to apps (e.g. utopian)

@@ -65,7 +65,6 @@ export class AppComponent {
         this.steemService.getCurationReward(vote).then(vote => {
           if (vote.value < 0.0005) {
             let index = this.votes.indexOf(vote);
-            console.log(index);
             if (index > -1) this.votes.splice(index, 1);
           }
           this.updateCurationSum();

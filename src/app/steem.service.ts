@@ -11,6 +11,12 @@ class RewardFund {
     this.reward_balance = parseFloat(
       reward_fund.reward_balance.replace(" STEEM", "")
     );
+    this.time_retrieved = Date.now();
+  }
+
+  isCurrent(): boolean {
+    const now: any = new Date();
+    return (now - this.time_retrieved) / 1000.0 < 5 * 60;
   }
 }
 
@@ -37,11 +43,16 @@ export class SteemService {
     });
   }
 
-  getRewardFund(): Promise<any> {
+  getRewardFund(): Promise<RewardFund> {
     return new Promise((resolve, reject) => {
+      // if their is a recent cached reward fund, use it, because it
+      // doesn't change that fast
+      if (this.cached_reward_fund && this.cached_reward_fund.isCurrent())
+        resolve(this.cached_reward_fund);
       steem.api.getRewardFund("post", (err, result) => {
         if (err) reject(err);
-        resolve(result);
+        this.cached_reward_fund = new RewardFund(result);
+        resolve(this.cached_reward_fund);
       });
     });
   }
@@ -65,22 +76,13 @@ export class SteemService {
   }
 
   async getVoteValue(accountName): Promise<number> {
-    const rewardFund = await this.getRewardFund();
+    const rewardFund: RewardFund = await this.getRewardFund();
     const account = await this.getAccount(accountName);
     const priceHistory = await this.getCurrentMedianHistoryPrice();
-    console.log(priceHistory);
-    const recent_claims: number = parseFloat(rewardFund.recent_claims);
     const vesting_shares: number =
       parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
-    const reward_balance: number = parseFloat(
-      rewardFund.reward_balance.replace(" STEEM", "")
-    );
-    console.log(recent_claims);
-    console.log(account);
-    var vote_share: number = 0.02 * vesting_shares / recent_claims;
-    console.log(vote_share);
-    var vote_steem_value: number = vote_share * reward_balance;
-    console.log(vote_steem_value);
+    var vote_share: number = 0.02 * vesting_shares / rewardFund.recent_claims;
+    var vote_steem_value: number = vote_share * rewardFund.reward_balance;
     var steem_value: number = parseFloat(priceHistory.base.replace(" SBD", ""));
     return steem_value * vote_steem_value;
   }
@@ -100,7 +102,7 @@ export class SteemService {
   }
 
   async getCurationReward(vote): Promise<any> {
-    const rewardFund = await this.getRewardFund();
+    const rewardFund: RewardFund = await this.getRewardFund();
     return new Promise((resolve, reject) => {
       const author = vote.authorperm.split("/")[0];
       const permlink = vote.authorperm.split("/")[1];
@@ -108,22 +110,14 @@ export class SteemService {
         if (err) reject(err);
         if (vote.weight == 0 || post.total_vote_weight == 0)
           return resolve(vote);
-        const recent_claims: number = parseFloat(rewardFund.recent_claims);
-        console.log("recent_claims=" + recent_claims);
-        const reward_balance: number = parseFloat(
-          rewardFund.reward_balance.replace(" STEEM", "")
-        );
         const share = vote.weight / post.total_vote_weight;
-        console.log("share=" + share);
         const totalRShares = post.active_votes
           .map(vote => parseFloat(vote.rshares))
           .reduce((acc, share) => acc + share);
-        console.log("totalRShares=" + totalRShares);
         const curationShares = share * 0.25 * totalRShares;
-        console.log(curationShares);
         const reward = Math.max(
           0,
-          curationShares * reward_balance / recent_claims
+          curationShares * rewardFund.reward_balance / rewardFund.recent_claims
         );
         vote.value = reward;
         vote.eta = 60 * 60 * 24 * 7 - this.getAgeInSeconds(post.created);
