@@ -14,3 +14,8 @@
 
 ### Account value
 * current market value of sbd and steem (coinmarket cap api)
+
+### Find a name
+* steem core
+* steem pit
+* steem pivot

@@ -1,5 +1,5 @@
 <nav class="navbar navbar-dark bg-info">
-  <div class="navbar-brand">SteemPit</div>
+  <div class="navbar-brand">DeepSteem</div>
   <div class="input-group" style="width:300px">
       <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon1">@</span>
@@ -11,33 +11,54 @@
 <div style="text-align:center" class="ml-5 mr-5 mt-3">
     
     <div class="row">
-    <div class="col-sm">
+    <div class="col-sm mb-2">
       <div class="card">
           <div class="card-header bg-info">Voting power</div>
           <div class="card-body">
-          <p class="card-text">{{ voting_power | number:'.1-2' }} %</p>
-        </div>
+            <p class="card-text">{{ account_info.voting_power | number:'.1-2' }} %</p>
+            <div class="progress">
+              <div class="progress-bar bg-info" role="progressbar" [style.width]="account_info.voting_power + '%'"
+              [attr.aria-valuenow]="account_info.voting_power" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+         </div>
       </div>
     </div>
 
-    <div class="col-sm">
+    <div class="col-sm mb-2">
       <div class="card">
         <div class="card-header bg-info">100% Vote value</div>
         <div class="card-body">
-          <p class="card-text">{{ vote_value | number:'.1-4' }} SBD</p>
+          <p class="card-text">{{ account_info.vote_value | number:'.1-4' }} SBD</p>
         </div>
       </div>
     </div>
 
-    <div class="col-sm">
+    <div class="col-sm mb-2">
         <div class="card mb-3">
           <div class="card-header bg-info">Expected curation rewards</div>
           <div class="card-body">
-            <p class="card-text">Total: {{ curation_sum | number:'.1-4' }} SP</p>
-            <p class="card-text">24h: {{ curation_sum_1d | number:'.1-4' }} SP</p>
+            <p class="card-text">Total: {{ account_info.curation_sum | number:'.1-4' }} SP</p>
+            <p class="card-text">24h: {{ account_info.curation_sum_1d | number:'.1-4' }} SP</p>
+            <div class="progress">
+              <div class="progress-bar bg-info" role="progressbar" [style.width]="account_info.vote_processed_num*100/account_info.vote_num + '%'"
+                   [attr.aria-valuenow]="account_info.vote_processed_num" aria-valuemin="0" [attr.aria-valuemax]="account_info.vote_num">{{account_info.vote_processed_num}}/{{account_info.vote_num}}</div>
+              </div>
           </div>
         </div>
       </div>
+    <div class="col-sm">
+      <div class="card mb-3">
+          <div class="card-header bg-info">Vote distribution</div>
+          <div class="card-body">
+              <div style="display: block">
+                <canvas baseChart
+                            [data]="doughnutChartData"
+                            [labels]="doughnutChartLabels"
+                            [chartType]="doughnutChartType"></canvas>
+              </div>
+            </div>
+      </div>
+    </div>
   </div>
   <div class="card ml-5 mr-5">
     <div class="card-header bg-info">Incoming curation rewards</div>
@@ -50,9 +71,9 @@
           <th scope="col">Reward</th>
         </thead>
         <tbody>
-          <tr *ngFor="let vote of votes">
+          <tr *ngFor="let vote of account_info.votes">
             <td>{{ (vote.eta/60) |  number:'.0-1' }} min</td>
-            <td><a target="_blank" rel="noopener" [href]="vote.url">{{ vote.authorperm }}</a></td>
+            <td><a target="_blank" rel="noopener" [href]="vote.url">{{ vote.shortperm }}</a></td>
             <td>{{ vote.weight }}</td>
             <td>{{ (vote.value | number:'.3') + " SP"}}</td>
           </tr>
