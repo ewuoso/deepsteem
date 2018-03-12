@@ -104,6 +104,10 @@ export class AppComponent {
         .getVoteValue(account_info.name)
         .then(val => (account_info.vote_value = val));
 
+      this.steemService
+        .getPosts(account_info.name)
+        .then(posts => console.log(posts));
+
       this.steemService.getVotes(account_info.name).then(val => {
         val.forEach(vote => {
           vote.value = 0.0;

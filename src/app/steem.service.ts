@@ -135,4 +135,30 @@ export class SteemService {
       });
     });
   }
+
+  async getPosts(accountName, maxAge = 60 * 60 * 24 * 7): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let date = new Date();
+      date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
+      let dateString = date.toJSON().substr(0, 19);
+      //steem.api.getDiscussionsByBlog(
+      steem.api.getDiscussionsByComments(
+        { start_author: accountName, limit: 10 },
+        (err, response) => {
+          if (err) reject(err);
+          resolve(response);
+        }
+      );
+      /*steem.api.getDiscussionsByAuthorBeforeDate(
+        accountName,
+        "",
+        dateString,
+        100,
+        (err, response) => {
+          if (err) reject(err);
+          resolve(response);
+        }
+      );*/
+    });
+  }
 }
