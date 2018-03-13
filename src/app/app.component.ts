@@ -12,6 +12,7 @@ class AccountInfo {
   vote_processed_num: number;
   curation_sum: number;
   curation_sum_1d: number;
+  comments: any[];
 
   constructor(account_name: String) {
     this.name = account_name;
@@ -44,17 +45,6 @@ export class AppComponent {
   ) {}
 
   voteHistogram(votes) {
-    /*
-    let authors = votes.map(vote => vote.authorperm.split("/")[0]);
-    let histo = new Array(authors.length);
-    authors.forEach(author => {
-      const index = authors.indexOf(author);
-      if ((histo[index] = undefined)) histo[index] = 1;
-      else histo[index]++;
-    });
-    authors = authors.filter((author, index, self) => {
-      return self.indexOf(author) == index;
-    });*/
     let upvotes = votes.filter(vote => vote.percent >= 0);
     let authors = upvotes.map(vote => vote.authorperm.split("/")[0]);
     let self_votes = authors.filter(author => author == this.account_name)
@@ -82,6 +72,7 @@ export class AppComponent {
   }
 
   accountChanged(newName) {
+    newName = newName.toLowerCase();
     this.account_name = newName;
     localStorage.setItem("account_name", newName);
     this.update();
@@ -105,7 +96,7 @@ export class AppComponent {
         .then(val => (account_info.vote_value = val));
 
       this.steemService
-        .getPosts(account_info.name)
+        .getComments(account_info.name)
         .then(posts => console.log(posts));
 
       this.steemService.getVotes(account_info.name).then(val => {

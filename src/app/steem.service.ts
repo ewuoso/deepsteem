@@ -1,24 +1,6 @@
 import { Injectable } from "@angular/core";
+import { RewardFund, SteemTools } from "./steem_tools";
 import * as steem from "steem";
-
-class RewardFund {
-  time_retrieved: any;
-  recent_claims: number;
-  reward_balance: number;
-
-  constructor(reward_fund: any) {
-    this.recent_claims = parseFloat(reward_fund.recent_claims);
-    this.reward_balance = parseFloat(
-      reward_fund.reward_balance.replace(" STEEM", "")
-    );
-    this.time_retrieved = Date.now();
-  }
-
-  isCurrent(): boolean {
-    const now: any = new Date();
-    return (now - this.time_retrieved) / 1000.0 < 5 * 60;
-  }
-}
 
 @Injectable()
 export class SteemService {
@@ -133,6 +115,22 @@ export class SteemService {
         vote.eta = 60 * 60 * 24 * 7 - this.getAgeInSeconds(post.created);
         resolve(vote);
       });
+    });
+  }
+
+  async getComments(accountName, commentLimit = 10): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let date = new Date();
+      date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
+      let dateString = date.toJSON().substr(0, 19);
+      //steem.api.getDiscussionsByBlog(
+      steem.api.getDiscussionsByComments(
+        { start_author: accountName, limit: commentLimit },
+        (err, response) => {
+          if (err) reject(err);
+          resolve(response);
+        }
+      );
     });
   }
 
