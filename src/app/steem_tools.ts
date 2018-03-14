@@ -2,14 +2,31 @@ import * as steem from "steem";
 
 export class RewardFund {
   time_retrieved: any;
-  recent_claims: number;
-  reward_balance: number;
+  public recent_claims: number;
+  public reward_balance: number;
+  public percent_curation_rewards: number;
 
   constructor(reward_fund: any) {
     this.recent_claims = parseFloat(reward_fund.recent_claims);
     this.reward_balance = parseFloat(
       reward_fund.reward_balance.replace(" STEEM", "")
     );
+    this.time_retrieved = Date.now();
+    this.percent_curation_rewards = reward_fund.percent_curation_rewards;
+  }
+
+  isCurrent(): boolean {
+    const now: any = new Date();
+    return (now - this.time_retrieved) / 1000.0 < 5 * 60;
+  }
+}
+
+export class MedianPriceHistory {
+  time_retrieved: any;
+  public base: number;
+
+  constructor(median_price_history: any) {
+    this.base = parseFloat(median_price_history.base.replace(" SBD", ""));
     this.time_retrieved = Date.now();
   }
 
@@ -20,6 +37,9 @@ export class RewardFund {
 }
 
 export class SteemTools {
+  // getRewardFund
+  //
+  // Promise wrapper for steem.api.getRewardFund
   public static getRewardFund(): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getRewardFund("post", (err, result) => {
@@ -29,16 +49,10 @@ export class SteemTools {
     });
   }
 
-  getContent(author: String, permlink: String): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getContent(author, permlink, function(err, result) {
-        if (err) reject(err);
-        resolve(result);
-      });
-    });
-  }
-
-  getCurrentMedianHistoryPrice(): Promise<any> {
+  // getCurrentMedianHistoryPrice
+  //
+  // Promise wrapper for steem.api.getCurrentMedianHistoryPrice
+  public static getCurrentMedianHistoryPrice(): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getCurrentMedianHistoryPrice((err, response) => {
         if (err) reject(err);
@@ -47,7 +61,11 @@ export class SteemTools {
     });
   }
 
-  payCurators(post: any, max_reward_tokens: number): number {
+  // payCurators - pay all curators and return whats left
+  //
+  // Distribute max_rewards_tokens among all votes according to
+  // their weight. Return the number of undistibuted tokens.
+  private static payCurators(post: any, max_reward_tokens: number): number {
     let unclaimed = max_reward_tokens;
     const total_weight = post.total_vote_weight;
     post.active_votes.forEach(vote => {
@@ -57,27 +75,35 @@ export class SteemTools {
     return Math.max(0, unclaimed);
   }
 
-  payOut(post: any, reward_fund: any, median_price_history: any): number[] {
-    const recent_claims = parseFloat(reward_fund.recent_claims);
-    const reward_balance = parseFloat(
-      reward_fund.reward_balance.replace(" STEEM", "")
-    );
-
-    const current_steem_price = median_price_history.base.replace(" SBD", "");
-    const claim = post.net_rshares * post.reward_weight / 10000.0;
-    const reward = claim * reward_balance / recent_claims;
+  // payOut - return the author rewards for a post.
+  //
+  // returns an array containing the rewards splitted in
+  // SBD and SP
+  public static payOut(
+    post: any,
+    reward_fund: RewardFund,
+    median_price_history: MedianPriceHistory
+  ): number[] {
+    const current_steem_price: number = median_price_history.base;
+    const claim: number = post.net_rshares * post.reward_weight / 10000.0;
+    const reward: number =
+      claim * reward_fund.reward_balance / reward_fund.recent_claims;
 
     // There is a payout threshold of 0.020 SBD.
     if (reward * current_steem_price < 0.02) return [0, 0];
 
-    const curation_tokens =
+    // The share dedicated to curation tokens, is a parameter
+    // of the reward fund. Currently it is 25%
+    const curation_tokens: number =
       reward * reward_fund.percent_curation_rewards / 10000.0;
-    let author_tokens = reward - curation_tokens;
+    let author_tokens: number = reward - curation_tokens;
 
     // re-add unclaimed curation tokens to the author tokens
+    // unclaimed tokens steem from votes in the first 30 minutes
+    // after post creation
     author_tokens += this.payCurators(post, curation_tokens);
 
-    let total_beneficiary = 0;
+    let total_beneficiary: number = 0;
     // pay beneficiaries
     post.beneficiaries.forEach(b => {
       total_beneficiary += author_tokens * b.weight / 10000.0;
@@ -85,9 +111,13 @@ export class SteemTools {
 
     author_tokens -= total_beneficiary;
 
-    const sbd_steem =
+    // split the author reward into SBD and SP as requested
+    // in the post parameters. Oddly, a value of 10000
+    // corresponds to 50% in this case (taken from the steem
+    // source code)
+    const sbd_steem: number =
       author_tokens * post.percent_steem_dollars / (2 * 10000.0);
-    const vesting_steem = author_tokens - sbd_steem;
+    const vesting_steem: number = author_tokens - sbd_steem;
 
     return [sbd_steem * current_steem_price, vesting_steem];
   }

@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import * as steem from "steem";
 import { SteemService } from "./steem.service";
 import { DomSanitizer } from "@angular/platform-browser";
+import { SteemTools } from "./steem_tools";
 
 class AccountInfo {
   name: String;
@@ -12,7 +13,7 @@ class AccountInfo {
   vote_processed_num: number;
   curation_sum: number;
   curation_sum_1d: number;
-  comments: any[];
+  posts: any[];
 
   constructor(account_name: String) {
     this.name = account_name;
@@ -23,6 +24,7 @@ class AccountInfo {
     this.votes = [];
     this.curation_sum = 0.0;
     this.curation_sum_1d = 0.0;
+    this.posts = [];
   }
 }
 
@@ -95,9 +97,29 @@ export class AppComponent {
         .getVoteValue(account_info.name)
         .then(val => (account_info.vote_value = val));
 
-      this.steemService
-        .getComments(account_info.name)
-        .then(posts => console.log(posts));
+      this.steemService.getPosts(account_info.name).then(posts => {
+        posts.forEach(post => {
+          post.sbd_value = 0.0;
+          post.sp_value = 0.0;
+          post.eta =
+            60 * 60 * 24 * 7 - this.steemService.getAgeInSeconds(post.created);
+          post.shortperm = post.permlink;
+          if (post.shortperm.length > 37)
+            post.shortperm = post.shortperm.substring(0, 37) + "...";
+          post.url = this.sanitizer.bypassSecurityTrustResourceUrl(
+            "https://steemit.com/@" + post.author + "/" + post.permlink
+          );
+        });
+        account_info.posts = posts;
+        for (let i: number = 0; i < account_info.posts.length; i++) {
+          let post = account_info.posts[i];
+          this.steemService.getPayout(post).then(payout => {
+            console.log(payout);
+            post.sbd_value = payout[0];
+            post.sp_value = payout[1];
+          });
+        }
+      });
 
       this.steemService.getVotes(account_info.name).then(val => {
         val.forEach(vote => {

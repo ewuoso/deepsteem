@@ -1,10 +1,11 @@
 import { Injectable } from "@angular/core";
-import { RewardFund, SteemTools } from "./steem_tools";
+import { RewardFund, SteemTools, MedianPriceHistory } from "./steem_tools";
 import * as steem from "steem";
 
 @Injectable()
 export class SteemService {
   cached_reward_fund: RewardFund = null;
+  cached_median_price_history: MedianPriceHistory = null;
   constructor() {}
 
   getAgeInSeconds(timeStamp): any {
@@ -40,11 +41,26 @@ export class SteemService {
       // if their is a recent cached reward fund, use it, because it
       // doesn't change that fast
       if (this.cached_reward_fund && this.cached_reward_fund.isCurrent())
-        resolve(this.cached_reward_fund);
+        return resolve(this.cached_reward_fund);
       steem.api.getRewardFund("post", (err, result) => {
         if (err) reject(err);
         this.cached_reward_fund = new RewardFund(result);
         resolve(this.cached_reward_fund);
+      });
+    });
+  }
+
+  getCurrentMedianHistoryPrice(): Promise<MedianPriceHistory> {
+    return new Promise((resolve, reject) => {
+      if (
+        this.cached_median_price_history &&
+        this.cached_median_price_history.isCurrent()
+      )
+        return resolve(this.cached_median_price_history);
+      steem.api.getCurrentMedianHistoryPrice((err, response) => {
+        if (err) reject(err);
+        this.cached_median_price_history = new MedianPriceHistory(response);
+        resolve(this.cached_median_price_history);
       });
     });
   }
@@ -58,15 +74,6 @@ export class SteemService {
     });
   }
 
-  getCurrentMedianHistoryPrice(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getCurrentMedianHistoryPrice((err, response) => {
-        if (err) reject(err);
-        resolve(response);
-      });
-    });
-  }
-
   async getVoteValue(accountName): Promise<number> {
     const rewardFund: RewardFund = await this.getRewardFund();
     const account = await this.getAccount(accountName);
@@ -75,7 +82,7 @@ export class SteemService {
       parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
     var vote_share: number = 0.02 * vesting_shares / rewardFund.recent_claims;
     var vote_steem_value: number = vote_share * rewardFund.reward_balance;
-    var steem_value: number = parseFloat(priceHistory.base.replace(" SBD", ""));
+    var steem_value: number = priceHistory.base;
     return steem_value * vote_steem_value;
   }
 
@@ -91,6 +98,13 @@ export class SteemService {
         );
       });
     });
+  }
+
+  async getPayout(post): Promise<any> {
+    const rewardFund: RewardFund = await this.getRewardFund();
+    const priceHistory: MedianPriceHistory = await this.getCurrentMedianHistoryPrice();
+    const payout = SteemTools.payOut(post, rewardFund, priceHistory);
+    return payout;
   }
 
   async getCurationReward(vote): Promise<any> {
@@ -139,24 +153,21 @@ export class SteemService {
       let date = new Date();
       date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
       let dateString = date.toJSON().substr(0, 19);
-      //steem.api.getDiscussionsByBlog(
-      steem.api.getDiscussionsByComments(
-        { start_author: accountName, limit: 10 },
-        (err, response) => {
-          if (err) reject(err);
-          resolve(response);
-        }
-      );
-      /*steem.api.getDiscussionsByAuthorBeforeDate(
+      steem.api.getDiscussionsByAuthorBeforeDate(
         accountName,
         "",
         dateString,
-        100,
+        10,
         (err, response) => {
           if (err) reject(err);
-          resolve(response);
+          let recent = response.filter(post => {
+            let post_age = this.getAgeInSeconds(post.created);
+            if (post_age < maxAge) return true;
+            return false;
+          });
+          resolve(recent);
         }
-      );*/
+      );
     });
   }
 }

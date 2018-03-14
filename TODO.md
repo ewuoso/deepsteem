@@ -1,9 +1,6 @@
-### General
-* save account name in local storage
-
 ### Curation Rewards
-* shorten authorperms to a maximum link
 * convert time from minutes to d/h/m
+* set rewards to zero if the total payout of the post is below 0.020 SBD
 
 ### Author Rewards
 * Pay respect to apps (e.g. utopian)
@@ -19,3 +16,5 @@
 * steem core
 * steem pit
 * steem pivot
+* steem inside
+* deepsteem.com
