@@ -1,9 +1,5 @@
-### Curation Rewards
-* convert time from minutes to d/h/m
-   * This should probably implemented as pipe
-
 ### Author Rewards
-* Pay respect to SBD value
+* Pay respect to current STEEM/SBD value
 
 ### Vote distribution
 * diagram of how votes are distributed

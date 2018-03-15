@@ -6,9 +6,10 @@ import { ChartsModule } from "ng2-charts";
 import { AppComponent } from "./app.component";
 
 import { SteemService } from "./steem.service";
+import { EtaPipe } from './eta.pipe';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, EtaPipe],
   imports: [BrowserModule, FormsModule, ChartsModule],
   providers: [SteemService],
   bootstrap: [AppComponent]

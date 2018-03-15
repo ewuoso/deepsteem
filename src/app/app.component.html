@@ -73,7 +73,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let post of account_info.posts">
-            <td>{{ (post.eta/60) |  number:'.0-1' }} min</td>
+            <td>{{ post.eta | ETA }} min</td>
             <td><a target="_blank" rel="noopener" [href]="post.url">{{ post.shortperm }}</a></td>
             <td>{{ (post.sbd_value | number:'.3') + " SBD" }}</td>
             <td>{{ (post.sp_value | number:'.3') + " SP" }}</td>
@@ -95,7 +95,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let vote of account_info.votes">
-            <td>{{ (vote.eta/60) |  number:'.0-1' }} min</td>
+            <td>{{ vote.eta |  ETA }}</td>
             <td><a target="_blank" rel="noopener" [href]="vote.url">{{ vote.shortperm }}</a></td>
             <td>{{ vote.weight }}</td>
             <td>{{ (vote.value | number:'.3') + " SP"}}</td>
