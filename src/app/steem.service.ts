@@ -109,6 +109,7 @@ export class SteemService {
 
   async getCurationReward(vote): Promise<any> {
     const rewardFund: RewardFund = await this.getRewardFund();
+    const priceHistory: MedianPriceHistory = await this.getCurrentMedianHistoryPrice();
     return new Promise((resolve, reject) => {
       const author = vote.authorperm.split("/")[0];
       const permlink = vote.authorperm.split("/")[1];
@@ -116,6 +117,14 @@ export class SteemService {
         if (err) reject(err);
         if (vote.weight == 0 || post.total_vote_weight == 0)
           return resolve(vote);
+
+        // if the post's total payout is less than 0.020 SBD, there is
+        // no payout at all:
+        const claim: number = post.net_rshares * post.reward_weight / 10000.0;
+        const postReward: number =
+          claim * rewardFund.reward_balance / rewardFund.recent_claims;
+        if (postReward * priceHistory.base < 0.02) return resolve(vote);
+
         const share = vote.weight / post.total_vote_weight;
         const totalRShares = post.active_votes
           .map(vote => parseFloat(vote.rshares))
