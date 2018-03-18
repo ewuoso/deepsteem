@@ -8,7 +8,7 @@
              (ngModelChange)="account_name = accountChanged($event)" aria-label="Username" aria-describedby="basic-addon1">
   </div>
 </nav>
-<div style="text-align:center" class="ml-5 mr-5 mt-3">
+<div style="text-align:center" class="ml-1 mr-1 mt-3">
     
     <div class="row">
     <div class="col-sm mb-2">
@@ -69,15 +69,13 @@
           <th scope="col>">Link</th>
           <th scope="col>">SP</th>
           <th scope="col>">SBD</th>
-          <th scope="col>">$</th>
         </thead>
         <tbody>
           <tr *ngFor="let post of account_info.posts">
-            <td>{{ post.eta | ETA }} min</td>
+            <td>{{ post.eta | ETA }}</td>
             <td><a target="_blank" rel="noopener" [href]="post.url">{{ post.shortperm }}</a></td>
             <td>{{ (post.sbd_value | number:'.3') + " SBD" }}</td>
             <td>{{ (post.sp_value | number:'.3') + " SP" }}</td>
-            <td>?</td>
           </tr>
         </tbody>
       </table>
