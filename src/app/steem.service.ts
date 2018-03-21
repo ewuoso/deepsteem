@@ -103,7 +103,16 @@ export class SteemService {
     const priceHistory = await this.getCurrentMedianHistoryPrice();
     const vesting_shares: number =
       parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
-    var vote_share: number = 0.02 * vesting_shares / rewardFund.recent_claims;
+    const received_shares: number =
+      parseFloat(account.received_vesting_shares.replace(" VESTS", "")) *
+      1000000;
+    const delegated_shares: number =
+      parseFloat(account.delegated_vesting_shares.replace(" VESTS", "")) *
+      1000000;
+    var vote_share: number =
+      0.02 *
+      (vesting_shares + received_shares - delegated_shares) /
+      rewardFund.recent_claims;
     var vote_steem_value: number = vote_share * rewardFund.reward_balance;
     var steem_value: number = priceHistory.base;
     return steem_value * vote_steem_value;
