@@ -1,11 +1,17 @@
 import { Injectable } from "@angular/core";
-import { RewardFund, SteemTools, MedianPriceHistory } from "./steem_tools";
+import {
+  RewardFund,
+  SteemTools,
+  MedianPriceHistory,
+  DynamicGlobalProperties
+} from "./steem_tools";
 import * as steem from "steem";
 
 @Injectable()
 export class SteemService {
   cached_reward_fund: RewardFund = null;
   cached_median_price_history: MedianPriceHistory = null;
+  cached_dynamic_global_properties: DynamicGlobalProperties = null;
   constructor() {}
 
   getAgeInSeconds(timeStamp): any {
@@ -65,6 +71,23 @@ export class SteemService {
     });
   }
 
+  getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+    return new Promise((resolve, reject) => {
+      if (
+        this.cached_dynamic_global_properties &&
+        this.cached_dynamic_global_properties.isCurrent()
+      )
+        return resolve(this.cached_dynamic_global_properties);
+      steem.api.getDynamicGlobalProperties((err, response) => {
+        if (err) reject(err);
+        this.cached_dynamic_global_properties = new DynamicGlobalProperties(
+          response
+        );
+        resolve(this.cached_dynamic_global_properties);
+      });
+    });
+  }
+
   getAccount(accountName): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getAccounts([accountName], (err, response) => {
@@ -103,7 +126,8 @@ export class SteemService {
   async getPayout(post): Promise<any> {
     const rewardFund: RewardFund = await this.getRewardFund();
     const priceHistory: MedianPriceHistory = await this.getCurrentMedianHistoryPrice();
-    const payout = SteemTools.payOut(post, rewardFund, priceHistory);
+    const dgp: DynamicGlobalProperties = await this.getDynamicGlobalProperties();
+    const payout = SteemTools.payOut(post, rewardFund, priceHistory, dgp);
     return payout;
   }
 
@@ -122,7 +146,12 @@ export class SteemService {
         // no payout at all:
         const claim: number = post.net_rshares * post.reward_weight / 10000.0;
         const postReward: number =
-          claim * rewardFund.reward_balance / rewardFund.recent_claims;
+          Math.floor(
+            claim *
+              rewardFund.reward_balance *
+              1000.0 /
+              rewardFund.recent_claims
+          ) / 1000.0;
         if (postReward * priceHistory.base < 0.02) return resolve(vote);
 
         const share = vote.weight / post.total_vote_weight;
@@ -130,10 +159,16 @@ export class SteemService {
           .map(vote => parseFloat(vote.rshares))
           .reduce((acc, share) => acc + share);
         const curationShares = share * 0.25 * totalRShares;
-        const reward = Math.max(
-          0,
-          curationShares * rewardFund.reward_balance / rewardFund.recent_claims
-        );
+        const reward =
+          Math.floor(
+            1000.0 *
+              Math.max(
+                0,
+                curationShares *
+                  rewardFund.reward_balance /
+                  rewardFund.recent_claims
+              )
+          ) / 1000.0;
         vote.value = reward;
         vote.eta = 60 * 60 * 24 * 7 - this.getAgeInSeconds(post.created);
         resolve(vote);

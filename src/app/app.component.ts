@@ -99,6 +99,7 @@ export class AppComponent {
 
       this.steemService.getPosts(account_info.name).then(posts => {
         posts.forEach(post => {
+          post.steem_value = 0.0;
           post.sbd_value = 0.0;
           post.sp_value = 0.0;
           post.eta =
@@ -110,13 +111,13 @@ export class AppComponent {
             "https://steemit.com/@" + post.author + "/" + post.permlink
           );
         });
-        account_info.posts = posts;
+        account_info.posts = posts.sort((a, b) => a.eta - b.eta);
         for (let i: number = 0; i < account_info.posts.length; i++) {
           let post = account_info.posts[i];
           this.steemService.getPayout(post).then(payout => {
-            console.log(payout);
-            post.sbd_value = payout[0];
-            post.sp_value = payout[1];
+            post.steem_value = payout[0];
+            post.sbd_value = payout[1];
+            post.sp_value = payout[2];
           });
         }
       });

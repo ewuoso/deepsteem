@@ -36,6 +36,21 @@ export class MedianPriceHistory {
   }
 }
 
+export class DynamicGlobalProperties {
+  time_retrieved: any;
+  public sbd_print_rate: number;
+
+  constructor(dynamic_global_properties: any) {
+    this.sbd_print_rate = dynamic_global_properties.sbd_print_rate;
+    this.time_retrieved = Date.now();
+  }
+
+  isCurrent(): boolean {
+    const now: any = new Date();
+    return (now - this.time_retrieved) / 1000.0 < 5 * 60;
+  }
+}
+
 export class SteemTools {
   // getRewardFund
   //
@@ -69,7 +84,9 @@ export class SteemTools {
     let unclaimed = max_reward_tokens;
     const total_weight = post.total_vote_weight;
     post.active_votes.forEach(vote => {
-      unclaimed -= max_reward_tokens * vote.weight / total_weight;
+      unclaimed -=
+        Math.floor(1000.0 * max_reward_tokens * vote.weight / total_weight) /
+        1000.0;
     });
 
     return Math.max(0, unclaimed);
@@ -82,20 +99,25 @@ export class SteemTools {
   public static payOut(
     post: any,
     reward_fund: RewardFund,
-    median_price_history: MedianPriceHistory
+    median_price_history: MedianPriceHistory,
+    dynamic_global_properties: DynamicGlobalProperties
   ): number[] {
     const current_steem_price: number = median_price_history.base;
     const claim: number = post.net_rshares * post.reward_weight / 10000.0;
     const reward: number =
-      claim * reward_fund.reward_balance / reward_fund.recent_claims;
+      Math.floor(
+        claim * reward_fund.reward_balance * 1000.0 / reward_fund.recent_claims
+      ) / 1000.0;
 
     // There is a payout threshold of 0.020 SBD.
-    if (reward * current_steem_price < 0.02) return [0, 0];
+    if (reward * current_steem_price < 0.02) return [0, 0, 0];
 
     // The share dedicated to curation tokens, is a parameter
     // of the reward fund. Currently it is 25%
     const curation_tokens: number =
-      reward * reward_fund.percent_curation_rewards / 10000.0;
+      Math.floor(
+        1000.0 * reward * reward_fund.percent_curation_rewards / 10000.0
+      ) / 1000.0;
     let author_tokens: number = reward - curation_tokens;
 
     // re-add unclaimed curation tokens to the author tokens
@@ -106,7 +128,8 @@ export class SteemTools {
     let total_beneficiary: number = 0;
     // pay beneficiaries
     post.beneficiaries.forEach(b => {
-      total_beneficiary += author_tokens * b.weight / 10000.0;
+      total_beneficiary +=
+        Math.floor(1000.0 * author_tokens * b.weight / 10000.0) / 1000.0;
     });
 
     author_tokens -= total_beneficiary;
@@ -117,8 +140,11 @@ export class SteemTools {
     // source code)
     const sbd_steem: number =
       author_tokens * post.percent_steem_dollars / (2 * 10000.0);
+    const to_steem =
+      sbd_steem * (10000 - dynamic_global_properties.sbd_print_rate) / 10000.0;
+    const to_sbd = sbd_steem - to_steem;
     const vesting_steem: number = author_tokens - sbd_steem;
 
-    return [sbd_steem * current_steem_price, vesting_steem];
+    return [to_steem, to_sbd * current_steem_price, vesting_steem];
   }
 }
