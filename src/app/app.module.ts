@@ -7,9 +7,11 @@ import { AppComponent } from "./app.component";
 
 import { SteemService } from "./steem.service";
 import { EtaPipe } from './eta.pipe';
+import { SteemStatsComponent } from './steem-stats/steem-stats.component';
+import { PromoLinkComponent } from './promo-link/promo-link.component';
 
 @NgModule({
-  declarations: [AppComponent, EtaPipe],
+  declarations: [AppComponent, EtaPipe, SteemStatsComponent, PromoLinkComponent],
   imports: [BrowserModule, FormsModule, ChartsModule],
   providers: [SteemService],
   bootstrap: [AppComponent]

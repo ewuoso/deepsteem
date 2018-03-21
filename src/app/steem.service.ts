@@ -201,7 +201,11 @@ export class SteemService {
     });
   }
 
-  async getPosts(accountName, maxAge = 60 * 60 * 24 * 7): Promise<any> {
+  async getPosts(
+    accountName,
+    limit = 10,
+    maxAge = 60 * 60 * 24 * 7
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       let date = new Date();
       date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
@@ -210,7 +214,7 @@ export class SteemService {
         accountName,
         "",
         dateString,
-        10,
+        limit,
         (err, response) => {
           if (err) reject(err);
           let recent = response.filter(post => {
