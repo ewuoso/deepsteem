@@ -73,11 +73,11 @@
         </thead>
         <tbody>
           <tr *ngFor="let post of account_info.posts">
-            <td>{{ post.eta | ETA }}</td>
-            <td><a target="_blank" rel="noopener" [href]="post.url">{{ post.shortperm }}</a></td>
-            <td>{{ (post.steem_value | number:'.3') + " STEEM" }}</td>
-            <td>{{ (post.sbd_value | number:'.3') + " SBD" }}</td>
-            <td>{{ (post.sp_value | number:'.3') + " SP" }}</td>
+            <td><small>{{ post.eta | ETA }}</small></td>
+            <td><small><a target="_blank" rel="noopener" [href]="post.url">{{ post.shortperm }}</a></small></td>
+            <td><small>{{ (post.steem_value | number:'.3') + " STEEM" }}</small></td>
+            <td><small>{{ (post.sbd_value | number:'.3') + " SBD" }}</small></td>
+            <td><small>{{ (post.sp_value | number:'.3') + " SP" }}</small></td>
           </tr>
         </tbody>
       </table>
@@ -95,10 +95,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let vote of account_info.votes">
-            <td>{{ vote.eta |  ETA }}</td>
-            <td><a target="_blank" rel="noopener" [href]="vote.url">{{ vote.shortperm }}</a></td>
-            <td>{{ vote.weight }}</td>
-            <td>{{ (vote.value | number:'.3') + " SP"}}</td>
+            <td><small>{{ vote.eta |  ETA }}</small></td>
+            <td><small><a target="_blank" rel="noopener" [href]="vote.url">{{ vote.shortperm }}</a></small></td>
+            <td><small>{{ vote.weight }}</small></td>
+            <td><small>{{ (vote.value | number:'.3') + " SP"}}</small></td>
           </tr>
         </tbody>
       </table>

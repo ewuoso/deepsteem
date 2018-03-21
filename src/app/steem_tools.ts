@@ -141,7 +141,12 @@ export class SteemTools {
     const sbd_steem: number =
       author_tokens * post.percent_steem_dollars / (2 * 10000.0);
     const to_steem =
-      sbd_steem * (10000 - dynamic_global_properties.sbd_print_rate) / 10000.0;
+      Math.floor(
+        1000.0 *
+          sbd_steem *
+          (10000 - dynamic_global_properties.sbd_print_rate) /
+          10000.0
+      ) / 1000.0;
     const to_sbd = sbd_steem - to_steem;
     const vesting_steem: number = author_tokens - sbd_steem;
 
