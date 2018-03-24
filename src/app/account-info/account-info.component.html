@@ -1,0 +1,14 @@
+<div class="col-sm mb-2">
+  <div class="card">
+    <div class="card-header bg-primary">Account Info</div>
+      <div class="card-body">
+        <p class="card-text">{{ voting_power | number:'.1-2' }} %</p>
+        <div class="progress">
+          <div class="progress-bar bg-info" role="progressbar" [style.width]="voting_power + '%'"
+            [attr.aria-valuenow]="voting_power" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p class="card-text">Vote value: {{ vote_value | number:'.1-4' }} SBD</p>
+      </div>
+    </div>
+</div>
+

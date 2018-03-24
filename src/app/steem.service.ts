@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Output, EventEmitter } from "@angular/core";
 import {
   RewardFund,
   SteemTools,
@@ -9,10 +9,17 @@ import * as steem from "steem";
 
 @Injectable()
 export class SteemService {
+  @Output() account_changed = new EventEmitter<String>();
+  account_name: String = null;
   cached_reward_fund: RewardFund = null;
   cached_median_price_history: MedianPriceHistory = null;
   cached_dynamic_global_properties: DynamicGlobalProperties = null;
   constructor() {}
+
+  setAccountName(newName: String) {
+    this.account_name = this.account_name;
+    this.account_changed.emit(newName);
+  }
 
   getAgeInSeconds(timeStamp): any {
     var now: any = new Date();

@@ -76,6 +76,18 @@ export class SteemTools {
     });
   }
 
+  // getFeedHistory
+  //
+  // Promise wrapper for steem.api.getFeedHistory
+  public static getFeedHistory(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      steem.api.getFeedHistory((err, response) => {
+        if (err) reject(err);
+        resolve(response);
+      });
+    });
+  }
+
   // payCurators - pay all curators and return whats left
   //
   // Distribute max_rewards_tokens among all votes according to

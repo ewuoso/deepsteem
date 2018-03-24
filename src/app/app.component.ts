@@ -35,7 +35,7 @@ class AccountInfo {
 })
 export class AppComponent {
   account_info: AccountInfo = null;
-  account_name: String = "nafestw";
+  account_name: String = null;
 
   public doughnutChartLabels: string[] = ["self", "others"];
   public doughnutChartData: number[] = [40, 50];
@@ -161,5 +161,10 @@ export class AppComponent {
     let stored_account_name = localStorage.getItem("account_name");
     if (stored_account_name) this.account_name = stored_account_name;
     this.update();
+    this.steemService.account_changed.subscribe(name => {
+      console.log("account updated");
+      this.account_name = name;
+      this.update();
+    });
   }
 }

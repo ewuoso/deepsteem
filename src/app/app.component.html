@@ -1,17 +1,10 @@
-<nav class="navbar navbar-dark bg-primary pt-3 pb-3">
-  <div class="navbar-brand">DeepSteem<small>(BETA)</small></div>
-  <div class="input-group" style="width:300px">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon1">@</span>
-      </div>
-      <input type="text" class="form-control" [ngModel]="account_name" 
-             (ngModelChange)="account_name = accountChanged($event)" aria-label="Username" aria-describedby="basic-addon1">
-  </div>
-</nav>
+<app-nav-bar></app-nav-bar>
 <div style="text-align:center" class="ml-1 mr-1 mt-3">
     <app-promo-link></app-promo-link>
     <div class="row">
+    
     <app-steem-stats></app-steem-stats>
+
     <div class="col-sm mb-2">
       <div class="card">
           <div class="card-header bg-primary">Voting power</div>

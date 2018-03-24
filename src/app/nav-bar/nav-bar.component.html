@@ -1,0 +1,10 @@
+<nav class="navbar navbar-dark bg-primary pt-3 pb-3">
+  <div class="navbar-brand">DeepSteem<small>(BETA)</small></div>
+  <div class="input-group" style="width:300px">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon1">@</span>
+      </div>
+      <input type="text" class="form-control" [ngModel]="account_name" 
+              (ngModelChange)="account_name = accountChanged($event)" aria-label="Username" aria-describedby="basic-addon1">
+  </div>
+</nav>
