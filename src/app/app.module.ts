@@ -13,6 +13,7 @@ import { PromoLinkComponent } from "./promo-link/promo-link.component";
 import { AccountInfoComponent } from "./account-info/account-info.component";
 import { NavBarComponent } from "./nav-bar/nav-bar.component";
 import { CoinmarketcapService } from "./coinmarketcap.service";
+import { DashBoardComponent } from './dash-board/dash-board.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { CoinmarketcapService } from "./coinmarketcap.service";
     SteemStatsComponent,
     PromoLinkComponent,
     AccountInfoComponent,
-    NavBarComponent
+    NavBarComponent,
+    DashBoardComponent
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, ChartsModule],
   providers: [SteemService, CoinmarketcapService],
