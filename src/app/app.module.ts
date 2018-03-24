@@ -3,6 +3,7 @@ import { FormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { ChartsModule } from "ng2-charts";
+import { RouterModule, Routes } from "@angular/router";
 
 import { AppComponent } from "./app.component";
 
@@ -13,7 +14,14 @@ import { PromoLinkComponent } from "./promo-link/promo-link.component";
 import { AccountInfoComponent } from "./account-info/account-info.component";
 import { NavBarComponent } from "./nav-bar/nav-bar.component";
 import { CoinmarketcapService } from "./coinmarketcap.service";
-import { DashBoardComponent } from './dash-board/dash-board.component';
+import { DashBoardComponent } from "./dash-board/dash-board.component";
+import { RewardHistoryComponent } from "./reward-history/reward-history.component";
+
+const routes: Routes = [
+  { path: "", redirectTo: "/dashboard", pathMatch: "full" },
+  { path: "dashboard", component: DashBoardComponent },
+  { path: "rewardhistory", component: RewardHistoryComponent }
+];
 
 @NgModule({
   declarations: [
@@ -23,9 +31,16 @@ import { DashBoardComponent } from './dash-board/dash-board.component';
     PromoLinkComponent,
     AccountInfoComponent,
     NavBarComponent,
-    DashBoardComponent
+    DashBoardComponent,
+    RewardHistoryComponent
   ],
-  imports: [BrowserModule, FormsModule, HttpClientModule, ChartsModule],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpClientModule,
+    ChartsModule,
+    RouterModule.forRoot(routes)
+  ],
   providers: [SteemService, CoinmarketcapService],
   bootstrap: [AppComponent]
 })
