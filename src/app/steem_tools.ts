@@ -39,9 +39,20 @@ export class MedianPriceHistory {
 export class DynamicGlobalProperties {
   time_retrieved: any;
   public sbd_print_rate: number;
+  public total_vesting_fund_steem: number;
+  public total_vesting_shares: number;
+  public steem_per_mvest: number;
 
   constructor(dynamic_global_properties: any) {
     this.sbd_print_rate = dynamic_global_properties.sbd_print_rate;
+    this.total_vesting_fund_steem = parseFloat(
+      dynamic_global_properties.total_vesting_fund_steem.replace(" STEEM", "")
+    );
+    this.total_vesting_shares = parseFloat(
+      dynamic_global_properties.total_vesting_shares.replace(" STEEM", "")
+    );
+    this.steem_per_mvest =
+      this.total_vesting_fund_steem * 1000000 / this.total_vesting_shares;
     this.time_retrieved = Date.now();
   }
 
@@ -52,6 +63,12 @@ export class DynamicGlobalProperties {
 }
 
 export class SteemTools {
+  public static getAgeInSeconds(timeStamp): any {
+    var now: any = new Date();
+    var time: any = new Date(timeStamp + "Z");
+    return (now - time) / 1000;
+  }
+
   // getRewardFund
   //
   // Promise wrapper for steem.api.getRewardFund
@@ -163,5 +180,67 @@ export class SteemTools {
     const vesting_steem: number = author_tokens - sbd_steem;
 
     return [to_steem, to_sbd * current_steem_price, vesting_steem];
+  }
+
+  // getAccountHistory
+  //
+  // Promise wrapper for steem.api.getAccountHistory
+  public static getAccountHistory(account, start, limit): Promise<any> {
+    return new Promise((resolve, reject) => {
+      steem.api.getAccountHistory(account, start, limit, (err, response) => {
+        if (err) return reject(err);
+        return resolve(response);
+      });
+    });
+  }
+
+  public static async getCompleteHistory(
+    account,
+    maxAge = 60 * 60 * 24 * 7
+  ): Promise<any[]> {
+    let history: any[] = [];
+    history = await this.getAccountHistory(account, -1, 999);
+    let totalHistory = history;
+    while (1) {
+      let firstid = history[0][0];
+      if (firstid == 0) {
+        break;
+      }
+      let timestamp = history[0][1].timestamp;
+      let age = this.getAgeInSeconds(timestamp);
+      if (age > 60 * 60 * 24 * 7) break;
+      let limit = Math.min(999, firstid - 1);
+      history = await this.getAccountHistory(account, firstid - 1, limit);
+      totalHistory = totalHistory.concat(history);
+    }
+    return totalHistory.filter(
+      h => this.getAgeInSeconds(h[1].timestamp) < 60 * 60 * 24 * 7
+    );
+  }
+
+  public static async getCurationRewardHistory(
+    account: String,
+    dgp: DynamicGlobalProperties
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.getCompleteHistory(account).then(history => {
+        const curation_transactions = history.filter(
+          trx => trx[1].op[0] == "curation_reward"
+        );
+        let rewards = curation_transactions.map(trx => {
+          const op = trx[1].op;
+          let r: any = {};
+          r.vests = op[1].reward.replace(" VESTS", "");
+          r.sp =
+            Math.floor(1000.0 * r.vests * dgp.steem_per_mvest / 1000000.0) /
+            1000.0;
+          r.author = op[1].comment_author;
+          r.permlink = op[1].comment_permlink;
+          r.timestamp = trx[1].timestamp;
+          return r;
+        });
+        return resolve(rewards);
+      });
+    });
   }
 }

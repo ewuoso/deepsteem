@@ -22,5 +22,6 @@ export class NavBarComponent implements OnInit {
   ngOnInit() {
     let stored_account_name = localStorage.getItem("account_name");
     if (stored_account_name) this.account_name = stored_account_name;
+    this.steemService.setAccountName(stored_account_name);
   }
 }

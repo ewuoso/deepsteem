@@ -14,10 +14,13 @@ export class SteemService {
   cached_reward_fund: RewardFund = null;
   cached_median_price_history: MedianPriceHistory = null;
   cached_dynamic_global_properties: DynamicGlobalProperties = null;
-  constructor() {}
+  constructor() {
+    let stored_account_name = localStorage.getItem("account_name");
+    if (stored_account_name) this.account_name = stored_account_name;
+  }
 
   setAccountName(newName: String) {
-    this.account_name = this.account_name;
+    this.account_name = newName;
     this.account_changed.emit(newName);
   }
 
@@ -233,5 +236,10 @@ export class SteemService {
         }
       );
     });
+  }
+
+  async getRewardHistory(): Promise<any> {
+    const dgp = await this.getDynamicGlobalProperties();
+    return SteemTools.getCurationRewardHistory(this.account_name, dgp);
   }
 }
