@@ -16,11 +16,13 @@ import { NavBarComponent } from "./nav-bar/nav-bar.component";
 import { CoinmarketcapService } from "./coinmarketcap.service";
 import { DashBoardComponent } from "./dash-board/dash-board.component";
 import { RewardHistoryComponent } from "./reward-history/reward-history.component";
+import { FollowersComponent } from "./followers/followers.component";
 
 const routes: Routes = [
   { path: "", redirectTo: "/dashboard", pathMatch: "full" },
   { path: "dashboard", component: DashBoardComponent },
-  { path: "rewardhistory", component: RewardHistoryComponent }
+  { path: "rewardhistory", component: RewardHistoryComponent },
+  { path: "followers", component: FollowersComponent }
 ];
 
 @NgModule({
@@ -32,14 +34,15 @@ const routes: Routes = [
     AccountInfoComponent,
     NavBarComponent,
     DashBoardComponent,
-    RewardHistoryComponent
+    RewardHistoryComponent,
+    FollowersComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule,
     ChartsModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes, { useHash: true })
   ],
   providers: [SteemService, CoinmarketcapService],
   bootstrap: [AppComponent]

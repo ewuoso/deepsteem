@@ -242,4 +242,8 @@ export class SteemService {
     const dgp = await this.getDynamicGlobalProperties();
     return SteemTools.getCurationRewardHistory(this.account_name, dgp);
   }
+
+  async getFollowers(): Promise<any> {
+    return SteemTools.getFollowers(this.account_name);
+  }  
 }

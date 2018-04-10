@@ -1,20 +1,26 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary pt-3 pb-3">
   <div class="navbar-brand">DeepSteem<small>(BETA)</small></div>
-  <div class ="collapse navbar-collapse">
-  <ul class="navbar-nav mr-auto">
-    <li class="nav-item">
-      <a class="nav-link" routerLinkActive="active" routerLink="/dashboard">Dashboard</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" routerLinkActive="active" routerLink="/rewardhistory">Reward History</a>
-    </li>
-  </ul>
-  <div class="input-group" style="width:300px">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon1">@</span>
-      </div>
-      <input type="text" class="form-control" [ngModel]="account_name" 
-              (ngModelChange)="account_name = accountChanged($event)" aria-label="Username" aria-describedby="basic-addon1">
-  </div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  <div class ="collapse navbar-collapse"  id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" routerLinkActive="active" routerLink="/dashboard">Dashboard</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" routerLinkActive="active" routerLink="/rewardhistory">Reward History</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLinkActive="active" routerLink="/followers">Followers</a>
+      </li>
+    </ul>
+    <div class="input-group" style="width:300px">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">@</span>
+        </div>
+        <input type="text" class="form-control" [ngModel]="account_name" 
+                (ngModelChange)="account_name = accountChanged($event)" aria-label="Username" aria-describedby="basic-addon1">
+    </div>
   </div>
 </nav>

@@ -243,4 +243,27 @@ export class SteemTools {
       });
     });
   }
+
+  public static async getFollowers(account_name: String): Promise<any> {
+    let followers: any[] = [];
+    followers = await steem.api.getFollowersAsync(
+      account_name,
+      "",
+      "blog",
+      100
+    );
+    while (1) {
+      const next_followers: any[] = await steem.api.getFollowersAsync(
+        account_name,
+        followers[followers.length - 1].follower,
+        "blog",
+        100
+      );
+      for (let j = 1; j < next_followers.length; j++) {
+        followers.push(next_followers[j]);
+      }
+      if (next_followers.length < 100) break;
+    }
+    return followers;
+  }
 }
