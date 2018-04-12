@@ -29,7 +29,7 @@ export class FollowersComponent implements OnInit {
 
     // median
     this.vote_median = processed_values.sort((a, b) => b - a)[
-      processed_values.length / 2
+      Math.floor(processed_values.length / 2)
     ];
 
     // number of processed

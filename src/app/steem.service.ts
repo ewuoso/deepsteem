@@ -113,7 +113,6 @@ export class SteemService {
     if (single_input) accountName = [accountName];
     const priceHistory = await this.getCurrentMedianHistoryPrice();
     const accounts = await steem.api.getAccountsAsync(accountName);
-    console.log(accounts);
     const vote_values = accounts.map(account => {
       const vesting_shares: number =
         parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
