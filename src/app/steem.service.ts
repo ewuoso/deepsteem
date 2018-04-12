@@ -107,25 +107,32 @@ export class SteemService {
     });
   }
 
-  async getVoteValue(accountName): Promise<number> {
+  async getVoteValue(accountName): Promise<any> {
     const rewardFund: RewardFund = await this.getRewardFund();
-    const account = await this.getAccount(accountName);
+    const single_input = typeof accountName == "string";
+    if (single_input) accountName = [accountName];
     const priceHistory = await this.getCurrentMedianHistoryPrice();
-    const vesting_shares: number =
-      parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
-    const received_shares: number =
-      parseFloat(account.received_vesting_shares.replace(" VESTS", "")) *
-      1000000;
-    const delegated_shares: number =
-      parseFloat(account.delegated_vesting_shares.replace(" VESTS", "")) *
-      1000000;
-    var vote_share: number =
-      0.02 *
-      (vesting_shares + received_shares - delegated_shares) /
-      rewardFund.recent_claims;
-    var vote_steem_value: number = vote_share * rewardFund.reward_balance;
-    var steem_value: number = priceHistory.base;
-    return steem_value * vote_steem_value;
+    const accounts = await steem.api.getAccountsAsync(accountName);
+    console.log(accounts);
+    const vote_values = accounts.map(account => {
+      const vesting_shares: number =
+        parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
+      const received_shares: number =
+        parseFloat(account.received_vesting_shares.replace(" VESTS", "")) *
+        1000000;
+      const delegated_shares: number =
+        parseFloat(account.delegated_vesting_shares.replace(" VESTS", "")) *
+        1000000;
+      var vote_share: number =
+        0.02 *
+        (vesting_shares + received_shares - delegated_shares) /
+        rewardFund.recent_claims;
+      var vote_steem_value: number = vote_share * rewardFund.reward_balance;
+      var steem_value: number = priceHistory.base;
+      return steem_value * vote_steem_value;
+    });
+    if (single_input) return vote_values[0];
+    return vote_values;
   }
 
   async getVotes(accountName, maxAge = 60 * 60 * 24 * 7): Promise<any> {
@@ -245,5 +252,9 @@ export class SteemService {
 
   async getFollowers(): Promise<any> {
     return SteemTools.getFollowers(this.account_name);
-  }  
+  }
+
+  async getFollowCount(): Promise<any> {
+    return SteemTools.getFollowCount(this.account_name);
+  }
 }

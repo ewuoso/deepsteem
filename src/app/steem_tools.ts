@@ -244,20 +244,24 @@ export class SteemTools {
     });
   }
 
+  public static async getFollowCount(account_name: String): Promise<any> {
+    return steem.api.getFollowCountAsync(account_name);
+  }
+
   public static async getFollowers(account_name: String): Promise<any> {
     let followers: any[] = [];
     followers = await steem.api.getFollowersAsync(
       account_name,
       "",
       "blog",
-      100
+      1000
     );
     while (1) {
       const next_followers: any[] = await steem.api.getFollowersAsync(
         account_name,
         followers[followers.length - 1].follower,
         "blog",
-        100
+        1000
       );
       for (let j = 1; j < next_followers.length; j++) {
         followers.push(next_followers[j]);
