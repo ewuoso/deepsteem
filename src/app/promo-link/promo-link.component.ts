@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { SteemService } from "../steem.service";
 import { DomSanitizer } from "@angular/platform-browser";
+import config from "../config";
 
 @Component({
   selector: "app-promo-link",
@@ -16,7 +17,7 @@ export class PromoLinkComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.steemService.getPosts("nafestw", 1).then(posts => {
+    this.steemService.getPosts(config.default_account, 1).then(posts => {
       if (posts.length == 1) {
         let post = posts[0];
         this.url = this.sanitizer.bypassSecurityTrustResourceUrl(

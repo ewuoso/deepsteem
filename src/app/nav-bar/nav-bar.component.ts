@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { SteemService } from "../steem.service";
+import config from "../config";
 
 @Component({
   selector: "app-nav-bar",
@@ -7,7 +8,7 @@ import { SteemService } from "../steem.service";
   styleUrls: ["./nav-bar.component.css"]
 })
 export class NavBarComponent implements OnInit {
-  public account_name: String = "nafestw";
+  public account_name: String = config.default_account;
 
   constructor(private steemService: SteemService) {}
 
