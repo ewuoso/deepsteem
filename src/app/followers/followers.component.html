@@ -13,8 +13,8 @@
     <div class="card">
       <div class="card-header bg-primary">Follower voting power</div>
       <div class="card-body">
-        <p class="card-text">Cumulative voting power: {{ vote_sum | number:'.1-4' }} SBD</p>
-        <p class="card-text">Median voting power: {{ vote_median | number:'.1-4' }} SBD</p>
+        <p class="card-text">Cumulative voting power: {{ vote_sum | number:'.1-3' }} SBD</p>
+        <p class="card-text">Median voting power: {{ vote_median | number:'.1-3' }} SBD</p>
         <div class="progress">
           <div class="progress-bar bg-info" role="progressbar" [style.width]="processed*100/total + '%'"
                [attr.aria-valuenow]="processed" aria-valuemin="0" [attr.aria-valuemax]="processed">{{processed}}/{{total}}</div>

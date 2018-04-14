@@ -127,7 +127,7 @@ export class SteemService {
         (vesting_shares + received_shares - delegated_shares) /
         rewardFund.recent_claims;
       var vote_steem_value: number = vote_share * rewardFund.reward_balance;
-      var steem_value: number = priceHistory.base;
+      var steem_value: number = priceHistory.price();
       return steem_value * vote_steem_value;
     });
     if (single_input) return vote_values[0];
@@ -177,7 +177,7 @@ export class SteemService {
               1000.0 /
               rewardFund.recent_claims
           ) / 1000.0;
-        if (postReward * priceHistory.base < 0.02) return resolve(vote);
+        if (postReward * priceHistory.price() < 0.02) return resolve(vote);
 
         const share = vote.weight / post.total_vote_weight;
         const totalRShares = post.active_votes

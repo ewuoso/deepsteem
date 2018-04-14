@@ -19,7 +19,7 @@ export class SteemStatsComponent implements OnInit {
   ngOnInit() {
     this.steemService
       .getCurrentMedianHistoryPrice()
-      .then(mhp => (this.median_price = mhp.base));
+      .then(mhp => (this.median_price = mhp.price()));
 
     this.steemService
       .getDynamicGlobalProperties()

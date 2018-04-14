@@ -23,11 +23,17 @@ export class RewardFund {
 
 export class MedianPriceHistory {
   time_retrieved: any;
-  public base: number;
+  private base: number;
+  private quote: number;
 
   constructor(median_price_history: any) {
     this.base = parseFloat(median_price_history.base.replace(" SBD", ""));
+    this.quote = parseFloat(median_price_history.quote.replace(" STEEM", ""));
     this.time_retrieved = Date.now();
+  }
+
+  price(): number {
+    return this.base / this.quote;
   }
 
   isCurrent(): boolean {
@@ -131,7 +137,7 @@ export class SteemTools {
     median_price_history: MedianPriceHistory,
     dynamic_global_properties: DynamicGlobalProperties
   ): number[] {
-    const current_steem_price: number = median_price_history.base;
+    const current_steem_price: number = median_price_history.price();
     const claim: number = post.net_rshares * post.reward_weight / 10000.0;
     const reward: number =
       Math.floor(
