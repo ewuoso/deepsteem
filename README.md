@@ -4,8 +4,7 @@ DeepSteem is a DashBoard for the STEEM blockchain which shows several statistics
 
 ## Run DeepSteem locally
 
-Clone the repository and install all dependencies with `npm install`. Then,
-run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Clone the repository with `git clone https://github.com/nafest/deepsteem.git` and install all dependencies with `npm install`. Then, run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Current features
 
