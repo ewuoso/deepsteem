@@ -17,6 +17,7 @@ import { CoinmarketcapService } from "./coinmarketcap.service";
 import { DashBoardComponent } from "./dash-board/dash-board.component";
 import { RewardHistoryComponent } from "./reward-history/reward-history.component";
 import { FollowersComponent } from "./followers/followers.component";
+import { VoteInfoComponent } from "./voteinfo/voteinfo.component";
 
 const routes: Routes = [
   { path: "", redirectTo: "/dashboard", pathMatch: "full" },
@@ -35,7 +36,8 @@ const routes: Routes = [
     NavBarComponent,
     DashBoardComponent,
     RewardHistoryComponent,
-    FollowersComponent
+    FollowersComponent,
+    VoteInfoComponent
   ],
   imports: [
     BrowserModule,

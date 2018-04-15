@@ -10,7 +10,7 @@ import * as steem from "steem";
 @Injectable()
 export class SteemService {
   @Output() account_changed = new EventEmitter<String>();
-  account_name: String = null;
+  public account_name: String = null;
   cached_reward_fund: RewardFund = null;
   cached_median_price_history: MedianPriceHistory = null;
   cached_dynamic_global_properties: DynamicGlobalProperties = null;

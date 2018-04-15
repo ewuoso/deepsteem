@@ -1,0 +1,11 @@
+<div class="card">
+  <div class="card-header bg-primary">Vote info</div>
+  <div class="card-body">
+    <p class="card-text"><small><span class="font-weight-bold">100% vote value:</span> {{ vote_value | number:'.1-4' }} SBD</small></p>
+    <p class="card-text"><small><span class="font-weight-bold">Voting power:</span> {{ voting_power | number:'.1-2' }} %</small></p>
+    <div class="progress">
+      <div class="progress-bar bg-info" role="progressbar" [style.width]="voting_power + '%'"
+      [attr.aria-valuenow]="voting_power" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+  </div>
+</div>

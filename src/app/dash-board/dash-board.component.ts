@@ -5,8 +5,6 @@ import { SteemTools } from "../steem_tools";
 
 class AccountInfo {
   name: String;
-  voting_power: number;
-  vote_value: number;
   votes: any[];
   vote_num: number;
   vote_processed_num: number;
@@ -16,8 +14,6 @@ class AccountInfo {
 
   constructor(account_name: String) {
     this.name = account_name;
-    this.voting_power = 0.0;
-    this.vote_value = 0.0;
     this.vote_num = 0;
     this.vote_processed_num = 0;
     this.votes = [];
@@ -89,13 +85,6 @@ export class DashBoardComponent implements OnInit {
     this.account_info = account_info;
     this.steemService.accountExists(account_info.name).then(exists => {
       if (!exists) return;
-      this.steemService
-        .getVotingPower(account_info.name)
-        .then(vpow => (account_info.voting_power = vpow));
-
-      this.steemService
-        .getVoteValue(account_info.name)
-        .then(val => (account_info.vote_value = val));
 
       this.steemService.getPosts(account_info.name).then(posts => {
         posts.forEach(post => {
