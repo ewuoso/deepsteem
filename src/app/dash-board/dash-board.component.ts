@@ -33,8 +33,9 @@ class AccountInfo {
   styleUrls: ["./dash-board.component.css"]
 })
 export class DashBoardComponent implements OnInit {
-  account_info: AccountInfo = null;
-  account_name: String = null;
+  public account_info: AccountInfo = null;
+  public account_name: String = null;
+  public show_steem_column: boolean = false;
 
   public doughnutChartLabels: string[] = ["self", "others"];
   public doughnutChartData: number[] = [40, 50];
@@ -153,6 +154,11 @@ export class DashBoardComponent implements OnInit {
           });
         }
       });
+    });
+    // show the STEEM column only if the SBD print rate is below
+    // 100%
+    this.steemService.getDynamicGlobalProperties().then(dgp => {
+      this.show_steem_column = dgp.sbd_print_rate < 10000;
     });
   }
 

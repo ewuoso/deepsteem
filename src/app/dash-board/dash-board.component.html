@@ -58,7 +58,7 @@
         <thead>
           <th scope="col">ETA</th>
           <th scope="col">Link</th>
-          <th scope="col">STEEM</th>
+          <th *ngIf="show_steem_column" scope="col">STEEM</th>
           <th scope="col">SBD</th>
           <th scope="col">SP</th>
         </thead>
@@ -66,7 +66,7 @@
           <tr *ngFor="let post of account_info.posts">
             <td><small>{{ post.eta | ETA }}</small></td>
             <td><small><a target="_blank" rel="noopener" [href]="post.url">{{ post.shortperm }}</a></small></td>
-            <td><small>{{ (post.steem_value | number:'.3') + " STEEM" }}</small></td>
+            <td *ngIf="show_steem_column"><small>{{ (post.steem_value | number:'.3') + " STEEM" }}</small></td>
             <td><small>{{ (post.sbd_value | number:'.3') + " SBD" }}</small></td>
             <td><small>{{ (post.sp_value | number:'.3') + " SP" }}</small></td>
           </tr>
