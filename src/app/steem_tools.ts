@@ -81,7 +81,7 @@ export class SteemTools {
   public static getRewardFund(): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getRewardFund("post", (err, result) => {
-        if (err) reject(err);
+        if (err) return reject(err);
         resolve(result);
       });
     });
@@ -93,7 +93,7 @@ export class SteemTools {
   public static getCurrentMedianHistoryPrice(): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getCurrentMedianHistoryPrice((err, response) => {
-        if (err) reject(err);
+        if (err) return reject(err);
         resolve(response);
       });
     });

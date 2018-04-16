@@ -137,7 +137,7 @@ export class SteemService {
   async getVotes(accountName, maxAge = 60 * 60 * 24 * 7): Promise<any> {
     return new Promise((resolve, reject) => {
       steem.api.getAccountVotes(accountName, (err, response) => {
-        if (err) reject(err);
+        if (err) return reject(err);
         resolve(
           response.filter(vote => {
             const voteAge = this.getAgeInSeconds(vote.time);
@@ -156,48 +156,62 @@ export class SteemService {
     return payout;
   }
 
+  async getContent(author, permlink, num_try = 5): Promise<any> {
+    return new Promise((resolve, reject) => {
+      steem.api.getContent(author, permlink, (err, post) => {
+        if (err)
+          if (num_try == 0) return reject(err);
+          else {
+            console.log("retry");
+            return resolve(this.getContent(author, permlink, num_try - 1));
+          }
+        resolve(post);
+      });
+    });
+  }
+
   async getCurationReward(vote): Promise<any> {
     const rewardFund: RewardFund = await this.getRewardFund();
     const priceHistory: MedianPriceHistory = await this.getCurrentMedianHistoryPrice();
     return new Promise((resolve, reject) => {
       const author = vote.authorperm.split("/")[0];
       const permlink = vote.authorperm.split("/")[1];
-      steem.api.getContent(author, permlink, (err, post) => {
-        if (err) reject(err);
-        if (vote.weight == 0 || post.total_vote_weight == 0)
-          return resolve(vote);
+      resolve(
+        this.getContent(author, permlink).then(post => {
+          if (vote.weight == 0 || post.total_vote_weight == 0) return vote;
 
-        // if the post's total payout is less than 0.020 SBD, there is
-        // no payout at all:
-        const claim: number = post.net_rshares * post.reward_weight / 10000.0;
-        const postReward: number =
-          Math.floor(
-            claim *
-              rewardFund.reward_balance *
-              1000.0 /
-              rewardFund.recent_claims
-          ) / 1000.0;
-        if (postReward * priceHistory.price() < 0.02) return resolve(vote);
+          // if the post's total payout is less than 0.020 SBD, there is
+          // no payout at all:
+          const claim: number = post.net_rshares * post.reward_weight / 10000.0;
+          const postReward: number =
+            Math.floor(
+              claim *
+                rewardFund.reward_balance *
+                1000.0 /
+                rewardFund.recent_claims
+            ) / 1000.0;
+          if (postReward * priceHistory.price() < 0.02) return vote;
 
-        const share = vote.weight / post.total_vote_weight;
-        const totalRShares = post.active_votes
-          .map(vote => parseFloat(vote.rshares))
-          .reduce((acc, share) => acc + share);
-        const curationShares = share * 0.25 * totalRShares;
-        const reward =
-          Math.floor(
-            1000.0 *
-              Math.max(
-                0,
-                curationShares *
-                  rewardFund.reward_balance /
-                  rewardFund.recent_claims
-              )
-          ) / 1000.0;
-        vote.value = reward;
-        vote.eta = 60 * 60 * 24 * 7 - this.getAgeInSeconds(post.created);
-        resolve(vote);
-      });
+          const share = vote.weight / post.total_vote_weight;
+          const totalRShares = post.active_votes
+            .map(vote => parseFloat(vote.rshares))
+            .reduce((acc, share) => acc + share);
+          const curationShares = share * 0.25 * totalRShares;
+          const reward =
+            Math.floor(
+              1000.0 *
+                Math.max(
+                  0,
+                  curationShares *
+                    rewardFund.reward_balance /
+                    rewardFund.recent_claims
+                )
+            ) / 1000.0;
+          vote.value = reward;
+          vote.eta = 60 * 60 * 24 * 7 - this.getAgeInSeconds(post.created);
+          return vote;
+        })
+      );
     });
   }
 
