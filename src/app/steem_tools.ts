@@ -1,4 +1,4 @@
-import * as steem from "steem";
+import { SteemApi } from "./steem_api";
 
 export class RewardFund {
   time_retrieved: any;
@@ -73,42 +73,6 @@ export class SteemTools {
     var now: any = new Date();
     var time: any = new Date(timeStamp + "Z");
     return (now - time) / 1000;
-  }
-
-  // getRewardFund
-  //
-  // Promise wrapper for steem.api.getRewardFund
-  public static getRewardFund(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getRewardFund("post", (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
-  }
-
-  // getCurrentMedianHistoryPrice
-  //
-  // Promise wrapper for steem.api.getCurrentMedianHistoryPrice
-  public static getCurrentMedianHistoryPrice(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getCurrentMedianHistoryPrice((err, response) => {
-        if (err) return reject(err);
-        resolve(response);
-      });
-    });
-  }
-
-  // getFeedHistory
-  //
-  // Promise wrapper for steem.api.getFeedHistory
-  public static getFeedHistory(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getFeedHistory((err, response) => {
-        if (err) reject(err);
-        resolve(response);
-      });
-    });
   }
 
   // payCurators - pay all curators and return whats left
@@ -193,7 +157,7 @@ export class SteemTools {
   // Promise wrapper for steem.api.getAccountHistory
   public static getAccountHistory(account, start, limit): Promise<any> {
     return new Promise((resolve, reject) => {
-      steem.api.getAccountHistory(account, start, limit, (err, response) => {
+      SteemApi.api.getAccountHistory(account, start, limit, (err, response) => {
         if (err) return reject(err);
         return resolve(response);
       });
@@ -251,19 +215,14 @@ export class SteemTools {
   }
 
   public static async getFollowCount(account_name: String): Promise<any> {
-    return steem.api.getFollowCountAsync(account_name);
+    return SteemApi.api.getFollowCount(account_name);
   }
 
   public static async getFollowers(account_name: String): Promise<any> {
     let followers: any[] = [];
-    followers = await steem.api.getFollowersAsync(
-      account_name,
-      "",
-      "blog",
-      1000
-    );
+    followers = await SteemApi.api.getFollowers(account_name, "", "blog", 1000);
     while (1) {
-      const next_followers: any[] = await steem.api.getFollowersAsync(
+      const next_followers: any[] = await SteemApi.api.getFollowers(
         account_name,
         followers[followers.length - 1].follower,
         "blog",

@@ -5,7 +5,7 @@ import {
   MedianPriceHistory,
   DynamicGlobalProperties
 } from "./steem_tools";
-import * as steem from "steem";
+import { SteemApi } from "./steem_api";
 
 @Injectable()
 export class SteemService {
@@ -32,18 +32,18 @@ export class SteemService {
 
   accountExists(accountName): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      steem.api.getAccounts([accountName], (err, response) => {
-        if (err) reject(err);
-        if (response[0]) resolve(true);
-        else resolve(false);
+      SteemApi.api.getAccounts([accountName], (err, response) => {
+        if (err) return reject(err);
+        if (response[0]) return resolve(true);
+        else return resolve(false);
       });
     });
   }
 
   getVotingPower(accountName): Promise<number> {
     return new Promise((resolve, reject) => {
-      steem.api.getAccounts([accountName], (err, response) => {
-        if (err) reject(err);
+      SteemApi.api.getAccounts([accountName], (err, response) => {
+        if (err) return reject(err);
         const secondsago = this.getAgeInSeconds(response[0].last_vote_time);
         var vpow = response[0].voting_power + 10000 * secondsago / 432000;
         vpow = Math.min(vpow / 100, 100).toFixed(2);
@@ -58,7 +58,7 @@ export class SteemService {
       // doesn't change that fast
       if (this.cached_reward_fund && this.cached_reward_fund.isCurrent())
         return resolve(this.cached_reward_fund);
-      steem.api.getRewardFund("post", (err, result) => {
+      SteemApi.api.getRewardFund("post", (err, result) => {
         if (err) reject(err);
         this.cached_reward_fund = new RewardFund(result);
         resolve(this.cached_reward_fund);
@@ -73,8 +73,8 @@ export class SteemService {
         this.cached_median_price_history.isCurrent()
       )
         return resolve(this.cached_median_price_history);
-      steem.api.getCurrentMedianHistoryPrice((err, response) => {
-        if (err) reject(err);
+      SteemApi.api.getCurrentMedianHistoryPrice((err, response) => {
+        if (err) return reject(err);
         this.cached_median_price_history = new MedianPriceHistory(response);
         resolve(this.cached_median_price_history);
       });
@@ -88,19 +88,20 @@ export class SteemService {
         this.cached_dynamic_global_properties.isCurrent()
       )
         return resolve(this.cached_dynamic_global_properties);
-      steem.api.getDynamicGlobalProperties((err, response) => {
-        if (err) reject(err);
-        this.cached_dynamic_global_properties = new DynamicGlobalProperties(
-          response
-        );
-        resolve(this.cached_dynamic_global_properties);
-      });
+      resolve(
+        SteemApi.api.getDynamicGlobalProperties().then(dgp => {
+          this.cached_dynamic_global_properties = new DynamicGlobalProperties(
+            dgp
+          );
+          return dgp;
+        })
+      );
     });
   }
 
   getAccount(accountName): Promise<any> {
     return new Promise((resolve, reject) => {
-      steem.api.getAccounts([accountName], (err, response) => {
+      SteemApi.api.getAccounts([accountName], (err, response) => {
         if (err) reject(err);
         resolve(response[0]);
       });
@@ -112,7 +113,7 @@ export class SteemService {
     const single_input = typeof accountName == "string";
     if (single_input) accountName = [accountName];
     const priceHistory = await this.getCurrentMedianHistoryPrice();
-    const accounts = await steem.api.getAccountsAsync(accountName);
+    const accounts = await SteemApi.api.getAccounts(accountName);
     const vote_values = accounts.map(account => {
       const vesting_shares: number =
         parseFloat(account.vesting_shares.replace(" VESTS", "")) * 1000000;
@@ -136,7 +137,7 @@ export class SteemService {
 
   async getVotes(accountName, maxAge = 60 * 60 * 24 * 7): Promise<any> {
     return new Promise((resolve, reject) => {
-      steem.api.getAccountVotes(accountName, (err, response) => {
+      SteemApi.api.getAccountVotes(accountName, (err, response) => {
         if (err) return reject(err);
         resolve(
           response.filter(vote => {
@@ -156,20 +157,6 @@ export class SteemService {
     return payout;
   }
 
-  async getContent(author, permlink, num_try = 5): Promise<any> {
-    return new Promise((resolve, reject) => {
-      steem.api.getContent(author, permlink, (err, post) => {
-        if (err)
-          if (num_try == 0) return reject(err);
-          else {
-            console.log("retry");
-            return resolve(this.getContent(author, permlink, num_try - 1));
-          }
-        resolve(post);
-      });
-    });
-  }
-
   async getCurationReward(vote): Promise<any> {
     const rewardFund: RewardFund = await this.getRewardFund();
     const priceHistory: MedianPriceHistory = await this.getCurrentMedianHistoryPrice();
@@ -177,7 +164,7 @@ export class SteemService {
       const author = vote.authorperm.split("/")[0];
       const permlink = vote.authorperm.split("/")[1];
       resolve(
-        this.getContent(author, permlink).then(post => {
+        SteemApi.api.getContent(author, permlink).then(post => {
           if (vote.weight == 0 || post.total_vote_weight == 0) return vote;
 
           // if the post's total payout is less than 0.020 SBD, there is
@@ -221,7 +208,7 @@ export class SteemService {
       date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
       let dateString = date.toJSON().substr(0, 19);
       //steem.api.getDiscussionsByBlog(
-      steem.api.getDiscussionsByComments(
+      SteemApi.api.getDiscussionsByComments(
         { start_author: accountName, limit: commentLimit },
         (err, response) => {
           if (err) reject(err);
@@ -240,7 +227,7 @@ export class SteemService {
       let date = new Date();
       date.setTime(date.getTime() - 1000.0 * 60.0 * 24 * 7);
       let dateString = date.toJSON().substr(0, 19);
-      steem.api.getDiscussionsByAuthorBeforeDate(
+      SteemApi.api.getDiscussionsByAuthorBeforeDate(
         accountName,
         "",
         dateString,
