@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { SteemService } from "../steem.service";
+import { FlashMessagesService } from "angular2-flash-messages";
 
 @Component({
   selector: "app-followers",
@@ -17,7 +18,11 @@ export class FollowersComponent implements OnInit {
   public num_followers: number = 0;
   public num_following: number = 0;
   public total: any = "fetching followers...";
-  constructor(private steemService: SteemService) {}
+
+  constructor(
+    private flashMessagesService: FlashMessagesService,
+    private steemService: SteemService
+  ) {}
 
   updateStatistics() {
     const processed_values = this.followers
@@ -62,38 +67,52 @@ export class FollowersComponent implements OnInit {
     );
   }
 
+  flashError(message) {
+    this.flashMessagesService.show(message, {
+      cssClass: "alert-danger",
+      timeout: 5000
+    });
+  }
+
   update() {
     this.followers = [];
     this.setVisibleFollowers([], 0);
     this.total = "fetching followers...";
     this.processed = 0;
     this.vote_sum = 0;
-    this.steemService.getFollowers().then(new_followers => {
-      if (new_followers[0].following != this.steemService.account_name) return;
-      this.followers = new_followers;
-      this.setVisibleFollowers(new_followers, 0);
-      this.total = new_followers.length;
-      /* get the vote values in chunks to reduce the number of requests */
-      for (let i = 0; i < new_followers.length; i += this.chunk_size) {
-        let chunk_accounts = new_followers.slice(
-          i,
-          Math.min(new_followers.length, i + this.chunk_size)
-        );
-        this.steemService
-          .getVoteValue(chunk_accounts.map(f => f.follower))
-          .then(values => {
-            values.forEach((value, index) => {
-              chunk_accounts[index].vote_value = value;
+    this.steemService
+      .getFollowers()
+      .then(new_followers => {
+        if (new_followers[0].following != this.steemService.account_name)
+          return;
+        this.followers = new_followers;
+        this.setVisibleFollowers(new_followers, 0);
+        this.total = new_followers.length;
+        /* get the vote values in chunks to reduce the number of requests */
+        for (let i = 0; i < new_followers.length; i += this.chunk_size) {
+          let chunk_accounts = new_followers.slice(
+            i,
+            Math.min(new_followers.length, i + this.chunk_size)
+          );
+          this.steemService
+            .getVoteValue(chunk_accounts.map(f => f.follower))
+            .then(values => {
+              values.forEach((value, index) => {
+                chunk_accounts[index].vote_value = value;
+              });
+              console.log(values);
+              this.updateStatistics();
             });
-            console.log(values);
-            this.updateStatistics();
-          });
-      }
-    });
-    this.steemService.getFollowCount().then(fc => {
-      this.num_followers = fc.follower_count;
-      this.num_following = fc.following_count;
-    });
+        }
+      })
+      .catch(err => this.flashError("Connection Error"));
+    this.steemService
+      .getFollowCount()
+      .then(fc => {
+        this.num_followers = fc.follower_count;
+        this.num_following = fc.following_count;
+      })
+      .catch(err => this.flashError("Connection Error"));
   }
   ngOnInit() {
     this.steemService.account_changed.subscribe(name => {

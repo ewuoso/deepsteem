@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { FlashMessagesService } from "angular2-flash-messages";
 import { SteemService } from "../steem.service";
 
 @Component({
@@ -9,7 +10,17 @@ import { SteemService } from "../steem.service";
 export class VoteInfoComponent implements OnInit {
   public vote_value: number = 0;
   public voting_power: number = 0;
-  constructor(private steemService: SteemService) {}
+  constructor(
+    private flashMessagesService: FlashMessagesService,
+    private steemService: SteemService
+  ) {}
+
+  flashError(message) {
+    this.flashMessagesService.show(message, {
+      cssClass: "alert-danger",
+      timeout: 5000
+    });
+  }
 
   update() {
     this.steemService
@@ -18,12 +29,15 @@ export class VoteInfoComponent implements OnInit {
         if (!exists) return;
         this.steemService
           .getVotingPower(this.steemService.account_name)
-          .then(vpow => (this.voting_power = vpow));
+          .then(vpow => (this.voting_power = vpow))
+          .catch(err => this.flashError("Connection Error"));
 
         this.steemService
           .getVoteValue(this.steemService.account_name)
-          .then(val => (this.vote_value = val));
-      });
+          .then(val => (this.vote_value = val))
+          .catch(err => this.flashError("Connection Error"));
+      })
+      .catch(err => this.flashError("Connection Error"));
   }
 
   ngOnInit() {

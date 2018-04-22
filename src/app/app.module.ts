@@ -4,6 +4,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { ChartsModule } from "ng2-charts";
 import { RouterModule, Routes } from "@angular/router";
+import { FlashMessagesModule } from "angular2-flash-messages";
 
 import { AppComponent } from "./app.component";
 
@@ -44,7 +45,8 @@ const routes: Routes = [
     FormsModule,
     HttpClientModule,
     ChartsModule,
-    RouterModule.forRoot(routes, { useHash: true })
+    RouterModule.forRoot(routes, { useHash: true }),
+    FlashMessagesModule.forRoot()
   ],
   providers: [SteemService, CoinmarketcapService],
   bootstrap: [AppComponent]

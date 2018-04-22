@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { SteemService } from "../steem.service";
 import { DomSanitizer } from "@angular/platform-browser";
 import { SteemTools } from "../steem_tools";
+import { FlashMessagesService } from "angular2-flash-messages";
 
 class AccountInfo {
   name: String;
@@ -38,6 +39,7 @@ export class DashBoardComponent implements OnInit {
   public doughnutChartType: string = "doughnut";
 
   constructor(
+    private flashMessagesService: FlashMessagesService,
     private steemService: SteemService,
     private sanitizer: DomSanitizer
   ) {}
@@ -77,78 +79,108 @@ export class DashBoardComponent implements OnInit {
     return newName;
   }
 
+  flashError(message) {
+    this.flashMessagesService.show(message, {
+      cssClass: "alert-danger",
+      timeout: 5000
+    });
+  }
+
   update() {
     // create a new AccountInfo object and use a reference to it,
     // don't use this.account_info to avoid that older callbacks (incorrectly)
     // change the state after the account has changed
     let account_info = new AccountInfo(this.account_name);
     this.account_info = account_info;
-    this.steemService.accountExists(account_info.name).then(exists => {
-      if (!exists) return;
-
-      this.steemService.getPosts(account_info.name).then(posts => {
-        posts.forEach(post => {
-          post.steem_value = 0.0;
-          post.sbd_value = 0.0;
-          post.sp_value = 0.0;
-          post.eta =
-            60 * 60 * 24 * 7 - this.steemService.getAgeInSeconds(post.created);
-          post.shortperm = post.permlink;
-          if (post.shortperm.length > 37)
-            post.shortperm = post.shortperm.substring(0, 37) + "...";
-          post.url = this.sanitizer.bypassSecurityTrustResourceUrl(
-            "https://steemit.com/@" + post.author + "/" + post.permlink
-          );
-        });
-        account_info.posts = posts.sort((a, b) => a.eta - b.eta);
-        for (let i: number = 0; i < account_info.posts.length; i++) {
-          let post = account_info.posts[i];
-          this.steemService.getPayout(post).then(payout => {
-            post.steem_value = payout[0];
-            post.sbd_value = payout[1];
-            post.sp_value = payout[2];
-          });
+    this.steemService
+      .accountExists(account_info.name)
+      .then(exists => {
+        if (!exists) {
+          return;
         }
-      });
 
-      this.steemService.getVotes(account_info.name).then(val => {
-        val.forEach(vote => {
-          vote.value = 0.0;
-          vote.eta = 0;
-          vote.shortperm = vote.authorperm;
-          if (vote.shortperm.length > 37)
-            vote.shortperm = vote.shortperm.substring(0, 37) + "...";
-        });
-        account_info.vote_num = val.length;
-        account_info.vote_processed_num = 0;
-        val.forEach(
-          vote =>
-            (vote.url = this.sanitizer.bypassSecurityTrustResourceUrl(
-              "https://steemit.com/@" + vote.authorperm
-            ))
-        );
-        account_info.votes = val;
-        this.voteHistogram(account_info.votes);
-        for (let i: number = 0; i < account_info.votes.length; i++) {
-          let vote = account_info.votes[i];
-          this.steemService.getCurationReward(vote).then(vote => {
-            if (vote.value < 0.0005) {
-              let index = account_info.votes.indexOf(vote);
-              if (index > -1) account_info.votes.splice(index, 1);
-              account_info.vote_num--;
-            } else {
-              account_info.vote_processed_num++;
+        this.steemService
+          .getPosts(account_info.name)
+          .then(posts => {
+            posts.forEach(post => {
+              post.steem_value = 0.0;
+              post.sbd_value = 0.0;
+              post.sp_value = 0.0;
+              post.eta =
+                60 * 60 * 24 * 7 -
+                this.steemService.getAgeInSeconds(post.created);
+              post.shortperm = post.permlink;
+              if (post.shortperm.length > 37)
+                post.shortperm = post.shortperm.substring(0, 37) + "...";
+              post.url = this.sanitizer.bypassSecurityTrustResourceUrl(
+                "https://steemit.com/@" + post.author + "/" + post.permlink
+              );
+            });
+            account_info.posts = posts.sort((a, b) => a.eta - b.eta);
+            for (let i: number = 0; i < account_info.posts.length; i++) {
+              let post = account_info.posts[i];
+              this.steemService.getPayout(post).then(payout => {
+                post.steem_value = payout[0];
+                post.sbd_value = payout[1];
+                post.sp_value = payout[2];
+              });
             }
-            this.updateCurationSum(account_info);
+          })
+          .catch(err => {
+            this.flashError("Connection Error");
           });
-        }
+
+        this.steemService
+          .getVotes(account_info.name)
+          .then(val => {
+            val.forEach(vote => {
+              vote.value = 0.0;
+              vote.eta = 0;
+              vote.shortperm = vote.authorperm;
+              if (vote.shortperm.length > 37)
+                vote.shortperm = vote.shortperm.substring(0, 37) + "...";
+            });
+            account_info.vote_num = val.length;
+            account_info.vote_processed_num = 0;
+            val.forEach(
+              vote =>
+                (vote.url = this.sanitizer.bypassSecurityTrustResourceUrl(
+                  "https://steemit.com/@" + vote.authorperm
+                ))
+            );
+            account_info.votes = val;
+            this.voteHistogram(account_info.votes);
+            for (let i: number = 0; i < account_info.votes.length; i++) {
+              let vote = account_info.votes[i];
+              this.steemService.getCurationReward(vote).then(vote => {
+                if (vote.value < 0.0005) {
+                  let index = account_info.votes.indexOf(vote);
+                  if (index > -1) account_info.votes.splice(index, 1);
+                  account_info.vote_num--;
+                } else {
+                  account_info.vote_processed_num++;
+                }
+                this.updateCurationSum(account_info);
+              });
+            }
+          })
+          .catch(err => {
+            this.flashError("Connection Error");
+          });
+      })
+      .catch(err => {
+        this.flashError("Connection Error");
       });
-    });
     // show the STEEM column only if the SBD print rate is below
     // 100%
-    this.steemService.getDynamicGlobalProperties().then(dgp => {
-      this.show_steem_column = dgp.sbd_print_rate < 10000;
-    });
+    this.steemService
+      .getDynamicGlobalProperties()
+      .then(dgp => {
+        this.show_steem_column = dgp.sbd_print_rate < 10000;
+      })
+      .catch(err => {
+        this.flashError("Connection Error");
+      });
   }
 
   ngOnInit() {

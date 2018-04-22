@@ -7,11 +7,14 @@ export class CoinmarketcapService {
 
   public getSteemPrice(): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.http
-        .get("https://api.coinmarketcap.com/v1/ticker/steem/")
-        .subscribe(data => {
+      this.http.get("https://api.coinmarketcap.com/v1/ticker/steem/").subscribe(
+        data => {
           resolve(parseFloat(data[0].price_usd));
-        });
+        },
+        error => {
+          reject(error);
+        }
+      );
     });
   }
 }

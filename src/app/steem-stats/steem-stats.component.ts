@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { SteemService } from "../steem.service";
 import { CoinmarketcapService } from "../coinmarketcap.service";
+import { FlashMessagesService } from "angular2-flash-messages";
 
 @Component({
   selector: "app-steem-stats",
@@ -12,19 +13,36 @@ export class SteemStatsComponent implements OnInit {
   public median_price: number = 0;
   public steem_price: number = 0;
   constructor(
+    private flashMessagesService: FlashMessagesService,
     private steemService: SteemService,
     private cmcService: CoinmarketcapService
   ) {}
 
+  flashError(message) {
+    this.flashMessagesService.show(message, {
+      cssClass: "alert-danger",
+      timeout: 5000
+    });
+  }
+
   ngOnInit() {
     this.steemService
       .getCurrentMedianHistoryPrice()
-      .then(mhp => (this.median_price = mhp.price()));
+      .then(mhp => (this.median_price = mhp.price()))
+      .catch(err => this.flashError("Connection Error"));
 
     this.steemService
       .getDynamicGlobalProperties()
-      .then(dgp => (this.sbd_print_rate = dgp.sbd_print_rate / 100.0));
+      .then(dgp => (this.sbd_print_rate = dgp.sbd_print_rate / 100.0))
+      .catch(err => this.flashError("Connection Error"));
 
-    this.cmcService.getSteemPrice().then(price => (this.steem_price = price));
+    this.cmcService
+      .getSteemPrice()
+      .then(price => (this.steem_price = price))
+      .catch(err => {
+        this.flashError(
+          "Error occured: could not receive current STEEM price from CoinMarketCap"
+        );
+      });
   }
 }
