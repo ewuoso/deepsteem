@@ -83,6 +83,7 @@ export class FollowersComponent implements OnInit {
     this.steemService
       .getFollowers()
       .then(new_followers => {
+        // ignore, if the account name has been changed
         if (new_followers[0].following != this.steemService.account_name)
           return;
         this.followers = new_followers;
@@ -100,12 +101,13 @@ export class FollowersComponent implements OnInit {
               values.forEach((value, index) => {
                 chunk_accounts[index].vote_value = value;
               });
-              console.log(values);
               this.updateStatistics();
             });
         }
       })
-      .catch(err => this.flashError("Connection Error"));
+      .catch(err => {
+        this.flashError("Connection Error");
+      });
     this.steemService
       .getFollowCount()
       .then(fc => {

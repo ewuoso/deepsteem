@@ -222,6 +222,7 @@ export class SteemTools {
     let followers: any[] = [];
     followers = await SteemApi.api.getFollowers(account_name, "", "blog", 1000);
     while (1) {
+      if (followers == undefined) break;
       const next_followers: any[] = await SteemApi.api.getFollowers(
         account_name,
         followers[followers.length - 1].follower,
