@@ -12,6 +12,8 @@ export class SteemStatsComponent implements OnInit {
   public sbd_print_rate: number = 0;
   public median_price: number = 0;
   public steem_price: number = 0;
+  public sbd_price: number = 0;
+
   constructor(
     private flashMessagesService: FlashMessagesService,
     private steemService: SteemService,
@@ -42,6 +44,15 @@ export class SteemStatsComponent implements OnInit {
       .catch(err => {
         this.flashError(
           "Error occured: could not receive current STEEM price from CoinMarketCap"
+        );
+      });
+
+    this.cmcService
+      .getSBDPrice()
+      .then(price => (this.sbd_price = price))
+      .catch(err => {
+        this.flashError(
+          "Error occured: could not receive current SBD price from CoinMarketCap"
         );
       });
   }
