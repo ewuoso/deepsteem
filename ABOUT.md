@@ -52,6 +52,6 @@ and
 
 
 
-For questions and suggestiosns please contribute [GITHUB](https://github.com/nafest/deepsteem)
+For questions and suggestions please contribute [GITHUB](https://github.com/nafest/deepsteem)
 
 
