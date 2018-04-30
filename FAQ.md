@@ -5,17 +5,17 @@ DeepSteem is a dashboard for the STEEM blockchain written as frontend only Angul
 dashboard which was created by @nafestw. It is built on the steem blockchain where it gets its data from. 
 
 
-### How do Deepsteem get the current value of steem?
+### How does DeepSteem get the current value of steem?
 
 The current STEEM price is retrieved from https://coinmarketcap.com, using their REST API.
 
-### Do i need to log in to Deepsteem with my steemit passowrd before i can access my profile?
+### Do i need to log in to DeepSteem with my steemit password before i can access my profile?
 
 No, you do not need to log in with your steemit password. All you need is your username.
 
-### What are part of my benefit when i use Deepsteem
+### What are my benefits when i use DeepSteem
 
-With Deepsteem you can get:
+With DeepSteem you can get:
 
 * Estimation of incoming curation rewards
 
@@ -26,30 +26,18 @@ With Deepsteem you can get:
 etc
 
 
- 
-
-### What is  followers cumulative voting value?
+### What is followers cumulative voting value?
 
 Followers cumulative value means the tota amount of vote woth all your followers will give when they vote you
 
 
-### Can i post using Deepsteem?
+### Can I post using Deepsteem?
 
 That feature is not available on Deepsteem? 
 
-### Can i contribute or report a bug on Deepsteem?
+### Can i contribute or report a bug on DeepSteem?
 
 If you want to fix bugs or add a feature to DeepSteem, open a pull request on [Github](https://github.com/nafest/deepsteem).
 
 
-### Is it safe to use Deepsteem?
-
-It is very safe to use Deepsteem
-
-
-For questions and suggestiosns please contribute or ask on  [GITHUB](https://github.com/nafest/deepsteem)
-
-
-
-
-
+For questions and suggestions please contribute or ask on [GITHUB](https://github.com/nafest/deepsteem)
