@@ -5,7 +5,7 @@ DeepSteem is a dashboard for the STEEM blockchain written as frontend only Angul
 
 ### How It Works 
 
-To use deepsteem, log on to http://deepsteem.com/#/dashboard where you inpit your steemit username and it brings out your data like vp, curation rewards, followers, history etc
+To use deepsteem, log on to http://deepsteem.com/#/dashboard where you input your steemit username and it brings out your data like vp, curation rewards, followers, history etc
 
 
 
@@ -28,26 +28,30 @@ To use deepsteem, log on to http://deepsteem.com/#/dashboard where you inpit you
 
 
 
-### MOre About Deepsteem
+
+### More About Deepsteem
 
 DeepSteem is implemented as frontend only Angular application (this way it can be run locally very easily). It uses steemjs to retrieve data from the STEEM blockchain. ng2-charts is used to display the diagram showing the share of self-votes. The current STEEM price is retrieved from https://coinmarketcap.com, using their REST API. Bootstrap is used for styling the frontend.
 
 
 
-## We at Deepsteem wants our users to enjoy more features in the future so we are going to include the following 
+## We at Deepsteem want our users to enjoy more features in the future. Presently we are looking forward to 
 
+
+
+
+* Displaying of a diagram of the price feed
+
+and 
 
 * Classification of followers into active/inactive
- Overhaul of the interface (especially visually)
 
-* Increase robustness by adding retries to requests   and fallbacks to other nodes if api.steemit.com is   not available
-
-* Do not show STEEM column if SBD print rate is 100%
-* Display a diagram of the price feed
+* Overhaul of the interface (especially visually)
 
 
 
 
-For questions and and suggestiosn please contribute [GITHUB](https://github.com/nafest/deepsteem)
+
+For questions and suggestiosns please contribute [GITHUB](https://github.com/nafest/deepsteem)
 
 
