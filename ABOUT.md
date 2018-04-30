@@ -50,8 +50,4 @@ and
 
 
 
-
-
-For questions and suggestions please contribute [GITHUB](https://github.com/nafest/deepsteem)
-
-
+For questions and suggestions please [contribute](https://github.com/nafest/deepsteem) on GitHub.
